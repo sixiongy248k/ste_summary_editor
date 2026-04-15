@@ -373,12 +373,16 @@ export async function handleExport(rewordFn) {
 
 /**
  * Copy export content to clipboard.
- * Uses the same scoped entries as the full preview — respects the active scope button
- * (All / Selected / Arc), so what you see in the preview is exactly what gets copied.
+ * Mirrors the live preview: if entries are selected, copies those; otherwise copies
+ * the scoped entries (respecting the All / Selected / Arc scope button).
  */
 export async function copyToClipboard() {
     const format = $('#se-export-format').val() || 'txt';
-    const content = buildExportContentFrom(getScopedEntries(), format);
+    const selCount = state.selected.size;
+    const entries = selCount > 0
+        ? [...state.selected].map(n => state.entries.get(n)).filter(Boolean).sort((a, b) => a.num - b.num)
+        : getScopedEntries();
+    const content = buildExportContentFrom(entries, format);
 
     try {
         await navigator.clipboard.writeText(content);
