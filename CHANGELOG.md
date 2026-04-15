@@ -1,0 +1,12 @@
+# 1.0.0 (2026-04-15)
+
+
+### Bug Fixes
+
+* add iro and mermaid to ESLint globals ([0ed1939](https://github.com/sixiongy248k/ste_summary_editor/commit/0ed19392c2e8f7e7a279f65481b42fef2192ccca))
+* artifact name slash, clean up all lint warnings ([4ef305b](https://github.com/sixiongy248k/ste_summary_editor/commit/4ef305b9b5654d00265cb74c4676f46271c8fcfc))
+
+
+### Features
+
+* add -Action flag to dev scripts for non-interactive use ([4b28d56](https://github.com/sixiongy248k/ste_summary_editor/commit/4b28d5662993ebdaf325477c8858f4e3b53a8dec))
