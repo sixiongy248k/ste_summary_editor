@@ -1,0 +1,26 @@
+<div class="se-float-panel se-fp-color">
+    <div class="se-float-panel-header">
+        <span class="se-float-panel-title">Customize Act Colors</span>
+        <button class="se-close-circle se-dialog-close" title="Close">&times;</button>
+    </div>
+    <div class="se-float-panel-body se-acd-body">
+        <div class="se-acd-list">{{actListHtml}}</div>
+        <div class="se-acd-picker-area">
+            <div class="se-acd-preview" id="se-acd-preview" style="background:{{firstColor}};"></div>
+            <div class="se-acd-iro-wrap">
+                <div id="se-acd-wheel"></div>
+            </div>
+            <div class="se-acd-fmt-row">
+                <select class="se-cp-fmt-select" id="se-acd-fmt">
+                    <option value="hex">HEX</option>
+                    <option value="hsl">HSL</option>
+                    <option value="rgb">RGB</option>
+                </select>
+                <div class="se-cp-fields" id="se-acd-flds"></div>
+            </div>
+        </div>
+    </div>
+    <div class="se-float-panel-actions">
+        <button class="se-btn se-btn-primary se-dialog-ok">Done</button>
+    </div>
+</div>

@@ -1,0 +1,144 @@
+<!-- ============================================================
+     Summary Editor — Export Panel (Tab 4)
+     Full export workflow with live preview, scope, RAG toggles.
+     ============================================================ -->
+
+<h3>Export Timeline</h3>
+
+<!-- Destination selector -->
+<div class="se-export-options">
+    <label>
+        Destination:
+        <select id="se-export-dest">
+            <option value="source-folder" id="se-dest-source-folder">Source Folder</option>
+            <option value="download">Download</option>
+            <option value="new-folder">New Folder (custom path)</option>
+        </select>
+    </label>
+    <div class="se-folder-path-wrap" id="se-folder-path-wrap" style="display:none;">
+        <label class="se-folder-path-label">Folder path:
+            <input type="text" id="se-folder-path" class="se-folder-path-input"
+                   placeholder="e.g. exports/my_timeline" />
+        </label>
+        <span class="se-folder-path-hint" id="se-folder-path-hint">Files will be saved to this folder via ST file API</span>
+    </div>
+</div>
+
+<!-- Scope selector -->
+<div>
+    <span style="color:#75715e; font-size:0.78em; text-transform:uppercase;">Scope:</span>
+    <div class="se-export-scope" style="margin-top:4px;">
+        <button class="se-scope-btn active" data-scope="all" id="se-scope-all">All entries (<span id="se-scope-all-count">0</span>)</button>
+        <span class="se-scope-act-wrap">
+            <button class="se-scope-btn" data-scope="act" id="se-scope-act">Current act</button>
+            <select id="se-scope-act-select" class="se-scope-act-dropdown" title="Select act to export">
+            </select>
+        </span>
+        <button class="se-scope-btn" data-scope="selected" id="se-scope-selected">Selected entries (<span id="se-scope-sel-count">0</span>)</button>
+    </div>
+</div>
+
+<!-- RAG reword checkboxes (experimental) -->
+<div>
+    <label class="se-export-check">
+        <input type="checkbox" id="se-export-rag" />
+        Reword entries for RAG clarity (Experimental)
+        <button class="se-prompt-edit-btn" data-edit-prompt="rag-reword" title="Edit RAG reword prompt">&#9881;</button>
+    </label>
+    <label class="se-export-check warn" id="se-export-rag-confirm-wrap" style="display:none; margin-top:4px; margin-left:24px;">
+        <input type="checkbox" id="se-export-rag-confirm" />
+        I understand this rewrites my content
+    </label>
+    <label class="se-export-check" style="margin-top:6px;">
+        <input type="checkbox" id="se-export-auto-inject" />
+        Auto-inject into databank after every export
+    </label>
+</div>
+
+<!-- Action buttons -->
+<div class="se-export-actions">
+    <span class="se-export-dl-group">
+        <button class="se-btn se-btn-primary se-btn-dl-export" id="se-btn-do-export">
+            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                <div class="se-btn-info-tip-title">Download Export</div>
+                <div class="se-btn-info-tip-body">.txt — plain text, newlines preserved.<br>.json — full fidelity, all characters encoded.<br>.yaml — multi-line block scalars.</div>
+            </span></span>
+            Download Export
+        </button>
+        <span class="se-format-group" id="se-format-group">
+            <button class="se-format-btn active" data-format="txt">.txt</button>
+            <button class="se-format-btn" data-format="json">.json</button>
+            <button class="se-format-btn" data-format="yaml">.yaml</button>
+        </span>
+    </span>
+    <button class="se-btn" id="se-btn-export-by-source">
+        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+            <div class="se-btn-info-tip-title">Download by Source</div>
+            <div class="se-btn-info-tip-body">One file per source — each file contains only the entries originally ingested from it.</div>
+        </span></span>
+        Download by Source
+    </button>
+    <button class="se-btn" id="se-btn-export-zip">
+        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+            <div class="se-btn-info-tip-title">Download as Zip</div>
+            <div class="se-btn-info-tip-body">Bundles all source files into a single zip archive for easy download.</div>
+        </span></span>
+        Download as Zip
+    </button>
+    <button class="se-btn se-btn-cyan" id="se-btn-databank-inject">
+        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+            <div class="se-btn-info-tip-title">Inject into Databank</div>
+            <div class="se-btn-info-tip-body">Uploads the exported text to SillyTavern's databank for RAG retrieval in chats.</div>
+        </span></span>
+        Inject into Databank
+    </button>
+    <span class="se-copy-wrap">
+        <button class="se-btn" id="se-btn-copy-clipboard">
+            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                <div class="se-btn-info-tip-title">Copy to Clipboard</div>
+                <div class="se-btn-info-tip-body">Copies the full export preview text to the clipboard.</div>
+            </span></span>
+            Copy to Clipboard
+        </button>
+        <div class="se-copy-popover" id="se-copy-popover">
+            <div class="se-copy-popover-header">Copied to clipboard</div>
+            <pre class="se-copy-popover-body" id="se-copy-popover-body"></pre>
+        </div>
+    </span>
+</div>
+
+<!-- Hidden format value (read by JS) -->
+<input type="hidden" id="se-export-format" value="txt" />
+
+<!-- Live preview -->
+<div>
+    <div class="se-live-preview-label" id="se-live-preview-label">Live Preview &mdash; Entry #1</div>
+    <div class="se-live-preview" id="se-live-preview"></div>
+</div>
+
+<!-- Full preview pane (scrollable) -->
+<div>
+    <div class="se-export-preview-label">
+        Full Preview (scroll for more)
+        <span class="se-export-token-total" id="se-export-token-total"></span>
+    </div>
+    <!-- RAG format toolbar -->
+    <div class="se-preview-fmt-bar" id="se-preview-fmt-bar">
+        <span class="se-preview-fmt-label">Inject:</span>
+        <button class="se-preview-fmt-btn" data-pfmt="bold" title="Wrap metadata in **bold**">Bold</button>
+        <button class="se-preview-fmt-btn" data-pfmt="headings" title="Add ## heading per entry">Headings</button>
+        <button class="se-preview-fmt-btn" data-pfmt="dividers" title="Add --- between entries">Dividers</button>
+        <button class="se-preview-fmt-btn" data-pfmt="quotes" title="Wrap entries in > blockquote">Quotes</button>
+        <button class="se-preview-fmt-btn" data-pfmt="bullets" title="Prefix entries with - bullet">Bullets</button>
+        <button class="se-preview-fmt-btn" data-pfmt="tags" title="Show metadata as explicit key:value tags">Tags</button>
+        <span class="se-preview-fmt-note" id="se-preview-fmt-note" style="display:none;">txt only</span>
+    </div>
+    <div class="se-export-preview" id="se-full-preview"></div>
+</div>
+
+<!-- RAG reword progress bar -->
+<div style="margin-top:8px;">
+    <div class="se-progress-bar" id="se-rag-progress" style="display:none;">
+        <div class="se-progress-fill" id="se-rag-progress-fill" style="width:0%"></div>
+    </div>
+</div>

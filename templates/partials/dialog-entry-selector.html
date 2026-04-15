@@ -1,0 +1,22 @@
+<div class="se-float-panel se-fp-wide">
+    <div class="se-float-panel-header">
+        <span class="se-float-panel-title">Assign Entries to Acts</span>
+        <button class="se-close-circle se-dialog-ok" title="Close">&times;</button>
+    </div>
+    <div class="se-float-panel-body">
+        <div class="se-esg-hint">Click entries to select, then choose an action below</div>
+        <div class="se-esg-toolbar">
+            <button class="se-btn se-btn-sm" id="se-esg-all">Select All</button>
+            <button class="se-btn se-btn-sm" id="se-esg-none">Clear Selection</button>
+            <button class="se-btn se-btn-sm" id="se-esg-unassigned">Invert Selection</button>
+            <span class="se-esg-count" id="se-esg-count">0 selected</span>
+        </div>
+        <div class="se-esg-grid" id="se-esg-grid">{{gridHtml}}</div>
+        <div class="se-esg-divider"></div>
+        <div class="se-esg-label">Assign selected to:</div>
+        <div class="se-esg-pills" id="se-esg-pills">{{pillsHtml}}</div>
+    </div>
+    <div class="se-float-panel-actions">
+        <button class="se-btn se-btn-primary se-dialog-ok">Done</button>
+    </div>
+</div>

@@ -1,0 +1,15 @@
+<!-- ============================================================
+     Summary Editor — Act Item Template
+     One row in the act management panel (list side).
+     Shows clickable badge (opens iro.js color picker), rename, delete.
+     ============================================================ -->
+
+<div class="se-act-item" data-act-id="{{actId}}">
+    <button class="se-close-circle se-act-delete" data-delete-act="{{actId}}" title="Delete act">&times;</button>
+    <span class="se-act-badge" style="background:{{colorBg}}; color:{{colorFg}}; cursor:pointer;"
+          data-color-picker="{{actId}}" title="Click to change color">
+        {{nameHtml}}
+    </span>
+    <input type="text" class="se-act-name-input" data-act-id="{{actId}}"
+           value="{{nameAttr}}" />
+</div>

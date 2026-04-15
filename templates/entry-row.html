@@ -1,0 +1,31 @@
+<!-- ============================================================
+     Summary Editor — Entry Row Template
+     Used for each numbered entry in the timeline table.
+     Placeholders ({{key}}) are replaced at render time.
+     Click-to-edit cells use floating popover (no inline inputs).
+     ============================================================ -->
+
+<tr data-num="{{num}}" class="{{rowClass}}" style="{{rowStyle}}">
+    <td class="se-col-check">
+        <input type="checkbox" data-num="{{num}}" {{checked}} />
+    </td>
+    <td class="se-col-num">{{healthBadge}}</td>
+    <td class="se-col-act">{{actBadge}}</td>
+    <td class="se-col-content se-content-cell {{contentModifiedClass}}" data-num="{{num}}" title="Click to edit content">
+        <span class="se-content-text" data-full="{{contentAttr}}">{{contentHtml}}</span>
+        <span class="se-tok-badge" title="~{{tokenCount}} tokens · {{wordCount}} words">~{{tokenCount}}</span>
+    </td>
+    <td class="se-editable-cell" data-num="{{num}}" data-field="date">
+        <span class="se-cell-display {{dateClass}}">{{dateDisplay}}</span>
+    </td>
+    <td class="se-editable-cell" data-num="{{num}}" data-field="time">
+        <span class="se-cell-display {{timeClass}}">{{timeDisplay}}</span>
+    </td>
+    <td class="se-editable-cell" data-num="{{num}}" data-field="location">
+        <span class="se-cell-display {{locationClass}}">{{locationDisplay}}</span>
+    </td>
+    <td class="se-editable-cell" data-num="{{num}}" data-field="notes">
+        <span class="se-cell-display {{notesClass}}" title="Author notes only — not saved to export file">{{notesDisplay}}</span>
+    </td>
+    {{feedbackCell}}
+</tr>

@@ -1,0 +1,45 @@
+<div id="summary-editor-settings" class="extension_settings">
+    <div class="inline-drawer">
+        <div class="inline-drawer-toggle inline-drawer-header">
+            <b>Summary Editor</b>
+            <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
+        </div>
+        <div class="inline-drawer-content">
+            <p class="se-settings-desc">
+                Ingest, organize, and export structured story timelines with act grouping,
+                conflict detection, and visual tools.
+            </p>
+            <div class="se-settings-actions">
+                <input id="se_open_btn" class="menu_button" type="button" value="Open Summary Editor" />
+            </div>
+
+            <hr style="margin:14px 0 10px; border:none; border-top:1px solid var(--SmartThemeBorderColor, #444);" />
+
+            <div class="se-bl-section">
+                <label class="se-bl-label" for="se-bl-char-search">
+                    <i class="fa-solid fa-user-slash"></i> Character Blacklist
+                </label>
+                <small class="se-bl-hint">Characters excluded from Summary Editor</small>
+                <div class="se-bl-input-wrap">
+                    <input type="text" id="se-bl-char-search" class="text_pole"
+                           placeholder="Search characters..." autocomplete="off" />
+                    <div class="se-bl-dropdown" id="se-bl-char-dropdown"></div>
+                </div>
+                <div class="se-bl-pills" id="se-bl-char-pills"></div>
+            </div>
+
+            <div class="se-bl-section">
+                <label class="se-bl-label" for="se-bl-tag-search">
+                    <i class="fa-solid fa-tags"></i> Tag Blacklist
+                </label>
+                <small class="se-bl-hint">All characters with these tags are excluded</small>
+                <div class="se-bl-input-wrap">
+                    <input type="text" id="se-bl-tag-search" class="text_pole"
+                           placeholder="Search tags..." autocomplete="off" />
+                    <div class="se-bl-dropdown" id="se-bl-tag-dropdown"></div>
+                </div>
+                <div class="se-bl-pills" id="se-bl-tag-pills"></div>
+            </div>
+        </div>
+    </div>
+</div>

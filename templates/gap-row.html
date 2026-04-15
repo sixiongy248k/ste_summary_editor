@@ -1,0 +1,15 @@
+<!-- ============================================================
+     Summary Editor — Gap Row Template
+     Shown for missing entry numbers in the sequence.
+     Greyed out, non-editable, with a warning icon.
+     ============================================================ -->
+
+<tr class="se-gap-row" data-num="{{num}}">
+    <td class="se-col-check"></td>
+    <td class="se-col-num">{{num}}</td>
+    <td class="se-col-act">&#9888;</td>
+    <td class="se-col-content" colspan="5" style="color:#fd971f;">
+        Missing entry #{{num}}
+        <button class="se-gap-suggest-btn" data-gap-num="{{num}}" title="AI-suggest content for this gap">&#10024; Suggest</button>
+    </td>
+</tr>

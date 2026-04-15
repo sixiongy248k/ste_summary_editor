@@ -1,0 +1,38 @@
+<div class="se-isp-header">
+    <span class="se-isp-title">{{fileName}}</span>
+    <button class="se-close-circle se-isp-close" title="Close split panel">&times;</button>
+</div>
+<div class="se-isp-body">
+    <div class="se-isp-instructions">
+        This file couldn't be automatically split into entries.
+        <strong>Select text</strong> and click <strong>Mark Segment</strong> to define entry boundaries.
+        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+            <div class="se-btn-info-tip-title">How Splitting Works</div>
+            <div class="se-btn-info-tip-body">
+                Each marked segment becomes a new numbered entry.<br>
+                Un-highlighted text is automatically kept as separate entries.<br>
+                You can mark multiple segments using different colors.
+            </div>
+        </span></span>
+    </div>
+    <div class="se-isp-content-area">
+        <div class="se-isp-text-col">
+            <textarea class="se-isp-textarea" id="se-isp-textarea" readonly spellcheck="false">{{content}}</textarea>
+            <div class="se-isp-preview" id="se-isp-preview"></div>
+        </div>
+        <div class="se-isp-side-col">
+            <div class="se-isp-toolbar">
+                <button class="se-btn se-btn-sm se-btn-primary" id="se-isp-mark">&#x271A; Mark Segment</button>
+                <button class="se-btn se-btn-sm" id="se-isp-clear-all">Clear All</button>
+            </div>
+            <div class="se-isp-seg-count" id="se-isp-seg-count">0 segments</div>
+            <div class="se-isp-segments" id="se-isp-segments"></div>
+        </div>
+    </div>
+</div>
+<div class="se-isp-footer">
+    <span class="se-isp-note">&#9432; Entries will be inserted at their correct position in the sequence</span>
+    <span style="flex:1;"></span>
+    <button class="se-btn se-btn-sm" id="se-isp-cancel">Cancel</button>
+    <button class="se-btn se-btn-primary se-btn-sm" id="se-isp-confirm" disabled>Confirm Split</button>
+</div>

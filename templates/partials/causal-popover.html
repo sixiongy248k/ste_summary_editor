@@ -1,0 +1,18 @@
+<div class="se-causal-popover" id="se-causal-popover">
+    <div class="se-causal-pop-header">
+        <span class="se-causal-pop-title">&#x26D3; Causal Links</span>
+        <button class="se-close-circle se-causal-pop-close">&times;</button>
+    </div>
+    <div class="se-causal-pop-controls">
+        <button class="se-btn se-btn-sm se-btn-primary" id="se-causal-range-btn">+ Range</button>
+        <button class="se-btn se-btn-sm" id="se-causal-clear-all" style="{{clearAllStyle}}">Clear All</button>
+    </div>
+    <div class="se-causal-range-form" id="se-causal-range-form" style="display:none;">
+        <input class="se-causal-range-input" type="number" id="se-causal-range-from" min="1" placeholder="From #" />
+        <span class="se-causal-arrow-sep">&#x2192;</span>
+        <input class="se-causal-range-input" type="number" id="se-causal-range-to" min="1" placeholder="To #" />
+        <button class="se-btn se-btn-sm se-btn-primary" id="se-causal-range-ok">Link</button>
+        <button class="se-btn se-btn-sm" id="se-causal-range-cancel">&#x2715;</button>
+    </div>
+    <div class="se-causal-chains" id="se-causal-chains">{{chainsHtml}}</div>
+</div>

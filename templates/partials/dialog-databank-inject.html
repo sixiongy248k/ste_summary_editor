@@ -1,0 +1,29 @@
+<div class="se-float-panel">
+    <div class="se-float-panel-header">
+        <span class="se-float-panel-title">Inject into Databank</span>
+        <button class="se-close-circle se-dialog-cancel" title="Close">&times;</button>
+    </div>
+    <div class="se-float-panel-body" style="font-size:0.88em;">
+        <p style="color:#fd971f;margin:0 0 10px;">
+            &#9888; This will insert data into the character's databank attachments.
+        </p>
+        <p style="color:#ccc;margin:0 0 12px;">Choose how to inject:</p>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="se-btn se-btn-primary se-inject-mode" data-mode="append">
+                Append (new entry)
+            </button>
+            <span style="color:#75715e;font-size:0.82em;padding-left:4px;">
+                Creates <strong style="color:#a6e22e;">SE_Entry_{{nextNum}}: bulk_summary</strong> — safe, non-destructive
+            </span>
+            <button class="se-btn se-btn-warn se-inject-mode" data-mode="overwrite">
+                Overwrite (replace existing)
+            </button>
+            <span style="color:#75715e;font-size:0.82em;padding-left:4px;">
+                Replaces <strong style="color:#f92672;">SE_bulk_summary</strong> if it exists — destructive
+            </span>
+        </div>
+    </div>
+    <div class="se-float-panel-actions">
+        <button class="se-btn se-dialog-cancel">Cancel</button>
+    </div>
+</div>

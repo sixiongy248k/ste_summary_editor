@@ -1,0 +1,24 @@
+<div class="se-sp-header">
+    <span class="se-sp-title">&#x2702; Split Entry #{{num}}</span>
+    <button class="se-close-circle se-sp-close">&times;</button>
+</div>
+<div class="se-sp-body">
+    <div class="se-sp-instructions">
+        Select text in the box below, then click <strong>Mark Segment</strong>.
+        Each marked segment becomes a new entry. Un-highlighted text is kept as separate entries.
+    </div>
+    <textarea class="se-sp-textarea" id="se-sp-textarea" readonly spellcheck="false">{{content}}</textarea>
+    <div class="se-sp-toolbar">
+        <button class="se-btn se-btn-sm se-btn-primary" id="se-sp-mark">&#x271A; Mark Segment</button>
+        <button class="se-btn se-btn-sm" id="se-sp-clear-all">Clear All</button>
+        <span class="se-sp-seg-count" id="se-sp-seg-count">0 segments</span>
+    </div>
+    <div class="se-sp-preview" id="se-sp-preview"></div>
+    <div class="se-sp-segments" id="se-sp-segments"></div>
+</div>
+<div class="se-sp-footer">
+    <span class="se-sp-note">&#9432; All entries above this one will shift up by (total pieces &minus; 1)</span>
+    <span style="flex:1;"></span>
+    <button class="se-btn se-btn-sm" id="se-sp-cancel">Cancel</button>
+    <button class="se-btn se-btn-primary se-btn-sm" id="se-sp-split" disabled>Split</button>
+</div>

@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Semantic Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build release ZIP
+        run: |
+          zip -r summary-editor-release.zip . \
+            --exclude ".git/*" \
+            --exclude "node_modules/*" \
+            --exclude ".github/*" \
+            --exclude "*.zip" \
+            --exclude "*.log" \
+            --exclude "key.pat" \
+            --exclude ".scannerwork/*"
+
+      - name: Release
+        run: npx semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

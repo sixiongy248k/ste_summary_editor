@@ -1,0 +1,333 @@
+<!-- ============================================================
+     Summary Editor — Main Modal Shell (Tabbed Layout)
+     4-tab workflow: Ingest → Review → Arcs → Export
+     Loaded once into the DOM by the template loader.
+     ============================================================ -->
+
+<div id="se-modal-overlay">
+    <div id="se-container">
+
+        <!-- ─── Header Bar ─── -->
+        <div id="se-header">
+            <h2>Summary Editor</h2>
+            <div class="se-header-actions">
+                <div id="se-api-status" class="se-api-status"></div>
+                <span class="se-header-divider"></span>
+                <div class="se-undo-box" id="se-undo-box" style="display:none;">
+                    <span class="se-undo-label">&#8630; Undo:</span>
+                    <span class="se-undo-desc" id="se-undo-desc"></span>
+                    <button class="se-btn se-btn-sm" id="se-btn-undo">Revert</button>
+                </div>
+                <button id="se-btn-clear-all-header" title="Clear all data and reset">Clear All</button>
+
+                <button class="se-header-close" id="se-btn-close" title="Close">&times;</button>
+            </div>
+        </div>
+
+        <!-- ─── Workflow Tabs ─── -->
+        <div id="se-tab-bar" class="se-tab-bar">
+            <div class="se-tab active" data-tab="0">
+                <span class="se-tab-num">1</span> Ingest
+                <span class="se-tab-badge" id="se-tab-badge-ingest"></span>
+            </div>
+            <div class="se-tab" data-tab="1">
+                <span class="se-tab-num">2</span> Review
+                <span class="se-tab-badge" id="se-tab-badge-review"></span>
+            </div>
+            <div class="se-tab" data-tab="2">
+                <span class="se-tab-num">3</span> Edit
+                <span class="se-tab-badge" id="se-tab-badge-acts"></span>
+            </div>
+            <div class="se-tab" data-tab="3">
+                <span class="se-tab-num">4</span> Export
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- TAB 1: INGEST                                   -->
+        <!-- ════════════════════════════════════════════════ -->
+        <div class="se-tab-panel active" id="se-panel-ingest">
+            <!-- Slide-out file drawer (left) -->
+            <div class="se-file-drawer" id="se-file-drawer">
+                <div class="se-file-drawer-header">
+                    <span class="se-file-drawer-title">Ingested Files</span>
+                    <button class="se-close-circle" id="se-file-drawer-close" title="Close file list">&times;</button>
+                </div>
+                <div class="se-file-list" id="se-file-list"></div>
+            </div>
+
+            <!-- Main ingest content -->
+            <div class="se-ingest-area">
+                <div class="se-file-drop" id="se-file-drop">
+                    <div class="se-drop-icon">&#128194;</div>
+                    <p><strong>Drop summary files here</strong></p>
+                    <p>or click to browse</p>
+                    <div class="se-file-formats">
+                        Accepts .txt, .json, .yaml
+                        <span class="se-info-icon" id="se-ingest-info">&#9432;</span>
+                        <div class="se-ingest-tooltip" id="se-ingest-tooltip">
+                            <div class="se-ingest-tooltip-title">File Recognition</div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>Filename</strong> &mdash; must contain <code>sum</code> and at least one digit<br>
+                                e.g. <code>summary_1.txt</code>, <code>sum2.txt</code>, <code>summaries_part3.yaml</code>
+                            </div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>Extensions</strong> &mdash; <code>.txt</code> &middot; <code>.json</code> &middot; <code>.yaml</code> / <code>.yml</code>
+                            </div>
+                            <div class="se-ingest-tooltip-title" style="margin-top:4px;">Recognized Formats</div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>Numbered</strong> &mdash; <code>1. First entry</code> or <code>#2. Second entry</code>
+                            </div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>Part-based</strong> &mdash; lines containing <code>part</code> + <code>:</code><br>
+                                e.g. <code>Part 1: content here</code>, <code>**part 2:** text</code>
+                            </div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>JSON</strong> &mdash; <code>[{"num":1,"content":"..."}]</code>
+                            </div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>YAML</strong> &mdash; <code>1: First entry content</code>
+                            </div>
+                            <div class="se-ingest-tooltip-section">
+                                <strong>Re-import</strong> &mdash; bracket metadata from previous export<br>
+                                <code>#N. (Act|date:val) content</code>
+                            </div>
+                            <div class="se-ingest-tooltip-title" style="margin-top:4px;">Rejection Reasons</div>
+                            <div class="se-ingest-tooltip-section">
+                                &#9432; <strong>Filename</strong> &mdash; missing &ldquo;sum&rdquo; or digit<br>
+                                &#9432; <strong>Extension</strong> &mdash; unsupported file type<br>
+                                &#9432; <strong>Empty</strong> &mdash; file has no content<br>
+                                &#9432; <strong>No structure</strong> &mdash; no numbered entries or part headers<br>
+                                &#9432; <strong>Malformed</strong> &mdash; corrupt or unparseable data
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="se-ingest-summary" id="se-ingest-summary">
+                    <span class="se-ingest-summary-text"></span>
+                    <span class="se-ingest-actions">
+                        <button class="se-btn se-btn-sm" id="se-btn-show-files" style="display:none;" title="Show ingested files">&#128194; Files</button>
+                        <button class="se-btn se-btn-sm" id="se-btn-clear-all">Clear All</button>
+                        <button class="se-btn se-btn-sm se-btn-primary" id="se-btn-continue-review">Continue &rarr;</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- TAB 2: REVIEW                                   -->
+        <!-- ════════════════════════════════════════════════ -->
+        <div class="se-tab-panel" id="se-panel-review">
+
+            <!-- Toolbar -->
+            <div class="se-review-toolbar">
+                <input type="text" id="se-search" placeholder="Search all columns..." style="width:200px;" />
+                <select id="se-sort">
+                    <option value="num">Sort: # Number</option>
+                    <option value="act">Sort: Act</option>
+                    <option value="content">Sort: Content</option>
+                    <option value="date">Sort: Date</option>
+                    <option value="time">Sort: Time</option>
+                    <option value="location">Sort: Location</option>
+                    <option value="notes">Sort: Notes</option>
+                </select>
+                <select id="se-filter">
+                    <option value="all">Filter: All</option>
+                    <option value="unassigned">Unassigned Only</option>
+                    <option value="gaps">Gaps Only</option>
+                    <option value="checked">Checked Only</option>
+                    <option value="unchecked">Unchecked Only</option>
+                </select>
+                <label class="se-show-full-label" title="Expand all content in the table">
+                    <input type="checkbox" id="se-show-full" /> Show Full
+                </label>
+                <span class="se-toolbar-rule"></span>
+                <span id="se-entry-count" class="se-toolbar-entry-count"></span>
+                <span class="se-spacer"></span>
+                <button class="se-btn se-btn-sm" id="se-btn-utils" title="Open utilities panel">&#9965; Utils</button>
+                <span class="se-conflict-group">
+                    <button class="se-btn se-btn-sm" id="se-conflict-btn" title="Send entries to connected LLM to detect inconsistencies">&#9888; Check Conflicts</button><button class="se-btn se-btn-sm se-conflict-prompt-btn" data-edit-prompt="conflict-check" title="Edit conflict check prompt">&#9881;</button>
+                </span>
+                <button class="se-btn se-btn-sm se-btn-timeline" id="se-btn-timeline" title="Analyse entries against marked timeline files" disabled>&#128197; Timeline</button>
+                <button class="se-btn se-btn-sm" id="se-conflict-clear" style="display:none;">
+                    <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                        <div class="se-btn-info-tip-title">Clear Conflicts</div>
+                        <div class="se-btn-info-tip-body">Removes all conflict highlights and feedback chips from the table. Does not affect entry content.</div>
+                    </span></span>
+                    Clear
+                </button>
+                <button class="se-btn se-btn-sm" id="se-conflict-log-btn" style="display:none;" title="View previous conflict analyses">&#128203; Log</button>
+            </div>
+
+            <!-- Conflict summary (hidden until check runs) -->
+            <div class="se-conflict-summary" id="se-conflict-summary" style="display:none;"></div>
+
+            <!-- Conflict progress bar -->
+            <div class="se-progress-bar" id="se-conflict-progress" style="display:none;">
+                <div class="se-progress-fill" id="se-conflict-progress-fill" style="width:0%;"></div>
+            </div>
+
+            <!-- Selection bar -->
+            <div class="se-selection-bar" id="se-selection-bar">
+                <span class="se-sel-count">0 selected</span>
+                <span class="se-sel-action">
+                    <select id="se-bulk-act-assign">
+                        <option value="">Assign to act…</option>
+                    </select>
+                </span>
+                <button class="se-btn se-btn-sm" id="se-btn-create-act" disabled>Create Act from Selection</button>
+                <button class="se-btn se-btn-sm" id="se-btn-move-entry" title="Move selected entry before another row">&#8693; Move Before&hellip;</button>
+                <button class="se-btn se-btn-sm" id="se-btn-swap-entries" title="Swap positions of two selected entries">&#8646; Swap Rows&hellip;</button>
+                <button class="se-btn se-btn-sm" id="se-btn-new-entry" title="Insert a blank entry after the selected row (shifts all entries above up by 1)">+ New Entry</button>
+                <button class="se-btn se-btn-sm" id="se-btn-simple-merge" title="Merge all selected entries into one combined entry (irreversible)" disabled>&#x22D2; Merge Selected</button>
+                <button class="se-btn se-btn-sm" id="se-btn-split-entry" title="Split one entry into multiple entries by highlighting segments" disabled>&#x2702; Split Entry</button>
+                <button class="se-btn se-btn-sm" id="se-btn-bulk-fill" title="Apply date, time, or location to all selected entries" disabled>&#9998; Bulk Fill</button>
+                <span class="se-sel-hint">Shift+click to select range</span>
+            </div>
+
+            <!-- Warning banner -->
+            <div class="se-warning-banner" id="se-warning-banner" style="display:none;">
+                <span class="se-warning-text"></span>
+                <button class="se-close-circle" id="se-dismiss-warnings">&times;</button>
+            </div>
+
+            <!-- Stats bar -->
+            <div class="se-stats-bar" id="se-stats-bar" style="display:none;"></div>
+
+            <!-- Table -->
+            <div id="se-table-wrap">
+                <table id="se-table">
+                    <thead>
+                        <tr>
+                            <th class="se-col-check">
+                                <input type="checkbox" id="se-select-all" title="Select all on page" />
+                            </th>
+                            <th class="se-col-num se-sortable" data-sort="num">#</th>
+                            <th class="se-col-act se-sortable" data-sort="act">ACT</th>
+                            <th class="se-col-content se-sortable" data-sort="content">CONTENT</th>
+                            <th class="se-sortable" data-sort="date">DATE</th>
+                            <th class="se-sortable" data-sort="time">TIME</th>
+                            <th class="se-sortable" data-sort="location">LOCATION</th>
+                            <th class="se-sortable" data-sort="notes" title="Author notes only — not saved to export file">NOTES &#9432;</th>
+                            <th id="se-th-feedback" class="se-col-feedback" style="display:none;">FEEDBACK</th>
+                        </tr>
+                    </thead>
+                    <tbody id="se-table-body"></tbody>
+                </table>
+
+                <!-- Empty state -->
+                <div class="se-empty-state" id="se-empty-state">
+                    <div class="se-empty-icon">&#128214;</div>
+                    <p><strong>No entries loaded</strong></p>
+                    <p>Go to the <em>Ingest</em> tab to load summary files with numbered entries.</p>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="se-pagination" style="display:none;">
+                <button class="se-btn se-btn-sm" id="se-page-first" title="Reset to first page">&#8634;</button>
+                <button class="se-btn" id="se-page-prev" disabled>&laquo; Prev</button>
+                <span class="se-page-info" id="se-page-info">Page 1 / 1</span>
+                <button class="se-btn" id="se-page-next">Next &raquo;</button>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- TAB 3: ARCS                                     -->
+        <!-- ════════════════════════════════════════════════ -->
+        <div class="se-tab-panel" id="se-panel-arcs">
+            <div class="se-acts-toolbar">
+                <button class="se-btn se-btn-primary" id="se-btn-new-act">Manage Acts</button>
+                <button class="se-btn" id="se-btn-minimap">&#9638; Show Map</button>
+                <button class="se-btn se-btn-teal" id="se-btn-manage-prompts" title="View and edit all LLM system prompts">&#9881; Prompts</button>
+            </div>
+            <div class="se-acts-content">
+                <div class="se-acts-list-panel">
+                    <div class="se-acts-list-header">Acts (<span id="se-act-count">0</span>)</div>
+                    <div class="se-acts-hint">Click a badge to change its color</div>
+                    <div id="se-act-list"></div>
+                </div>
+                <div class="se-acts-detail-panel" id="se-act-detail">
+                    <div class="se-act-detail-empty" style="padding:40px;text-align:center;color:#75715e;">
+                        Select an act to see details
+                    </div>
+                </div>
+            </div>
+
+            <!-- Minimap overlay (drawn over arcs content) -->
+            <div class="se-minimap-overlay" id="se-minimap-overlay">
+                <div class="se-minimap-overlay-header">
+                    <h3>&#9638; Act Map &mdash; All Entries</h3>
+                    <button class="se-close-circle" id="se-btn-minimap-close">&times;</button>
+                </div>
+                <div class="se-minimap-body">
+                    <div class="se-minimap-top">
+                        <div class="se-minimap-grid" id="se-minimap-grid"></div>
+                        <div class="se-minimap-legend" id="se-minimap-legend"></div>
+                    </div>
+                    <div class="se-minimap-bottom" id="se-minimap-bottom">
+                        <!-- Viewport fills the entire area; bars float above it -->
+                        <div class="se-timeline-viewport" id="se-timeline-viewport">
+                            <div class="se-timeline-canvas" id="se-timeline-canvas"></div>
+                        </div>
+
+                        <!-- Horizontal top bar: view toggles + label -->
+                        <div class="se-timeline-toolbar" id="se-timeline-toolbar">
+                            <button class="se-tl-view-btn active" id="se-tl-view-timeline"
+                                title="Timeline &#8212; entries plotted chronologically on a time axis">&#8210;&#9679;&#8210;</button>
+                            <button class="se-tl-view-btn" id="se-tl-view-bubbles"
+                                title="Locations &#8212; bubble cluster: size reflects how often a location appears">&#9711;</button>
+                            <span class="se-timeline-label" id="se-timeline-label">Timeline</span>
+                        </div>
+
+                        <!-- Vertical left sidebar: zoom + expand controls -->
+                        <div class="se-tl-sidebar" id="se-tl-sidebar">
+                            <button class="se-tl-sb-btn" id="se-tl-zoom-in" title="Zoom in">+</button>
+                            <button class="se-tl-sb-btn" id="se-tl-reset" title="Reset zoom">&#8634;</button>
+                            <button class="se-tl-sb-btn" id="se-tl-zoom-out" title="Zoom out">&minus;</button>
+                            <button class="se-tl-sb-btn" id="se-tl-expand" title="Expand to full viewport">&#x26F6;</button>
+                            <button class="se-tl-sb-btn se-tl-sb-exit" id="se-tl-exit" title="Exit full view" style="display:none;">&times;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════════════════════════════════════════════════ -->
+        <!-- TAB 4: EXPORT                                   -->
+        <!-- ════════════════════════════════════════════════ -->
+        <div class="se-tab-panel" id="se-panel-export">
+            <div id="se-export-panel"></div>
+        </div>
+
+        <!-- ─── Footer Navigation ─── -->
+        <div class="se-footer-nav" id="se-footer-nav">
+            <button class="se-btn se-btn-sm se-footer-back" id="se-footer-back">&lsaquo; Back</button>
+            <span class="se-footer-spacer"></span>
+            <button class="se-btn se-btn-sm se-btn-primary se-footer-next" id="se-footer-next">Next &rsaquo;</button>
+        </div>
+
+        <!-- ─── Hidden File Input (for ingestion) ─── -->
+        <input type="file" id="se-file-input" multiple accept=".txt,.json,.yaml,.yml" style="display:none;" />
+
+    </div>
+
+    <!-- ─── Floating elements ─── -->
+    <div class="se-cell-popover" id="se-cell-popover" style="display:none;"></div>
+    <div class="se-gap-popover" id="se-gap-popover" style="display:none;"></div>
+
+    <!-- ─── Causal links info tooltip (fixed-position, escapes clipping) ─── -->
+    <div class="se-causal-info-tooltip" id="se-causal-info-tooltip" style="display:none;">
+        <div class="se-ingest-tooltip-title">Causal Links</div>
+        <div class="se-ingest-tooltip-section">
+            Link entries that directly cause each other by adding a range. Chains group into range pills.
+        </div>
+        <div class="se-ingest-tooltip-section">
+            <strong>Link Merge</strong> &mdash; Linked entries in a chain can be merged into one combined paragraph.<br>
+            <span style="color:#f92672;">&#9888; Irreversible</span> &mdash; merged rows are permanently removed.
+        </div>
+        <div class="se-ingest-tooltip-section">
+            Merging entries from different acts assigns the result to the <strong>earliest act</strong> in the group.
+        </div>
+    </div>
+</div>

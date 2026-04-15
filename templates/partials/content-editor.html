@@ -1,0 +1,38 @@
+<div class="se-ce-header">
+    <span class="se-ce-title">&#9998; Entry #{{num}} — Edit Content</span>
+    <div class="se-ce-header-right">
+        {{modifiedBadge}}
+        <button class="se-ce-expand" id="se-ce-expand" title="Toggle fullscreen">&#x26F6;</button>
+        <button class="se-close-circle se-ce-close" title="Close">&times;</button>
+    </div>
+</div>
+<div class="se-ce-body">
+    <div class="se-ce-field-label">Content</div>
+    <textarea class="se-ce-textarea" id="se-ce-textarea">{{content}}</textarea>
+    <div class="se-ce-counter" id="se-ce-counter">{{counterText}}</div>
+
+    <div class="se-ce-api-bar">
+        <button class="se-btn se-btn-sm se-btn-primary" id="se-ce-ask-api">&#9881; Ask API to Revise</button>
+        <button class="se-btn se-btn-sm" id="se-ce-toggle-prompt">&#9998; System Prompt</button>
+        <button class="se-btn se-btn-sm" id="se-ce-recheck" title="Re-run conflict detection for this entry">&#8635; Re-check Conflicts</button>
+        <span class="se-ce-api-status" id="se-ce-api-status"></span>
+    </div>
+
+    <div class="se-ce-prompt-section" id="se-ce-prompt-section" style="display:none;">
+        <div class="se-ce-field-label">System Prompt</div>
+        <textarea class="se-ce-prompt-textarea" id="se-ce-prompt-textarea">{{systemPrompt}}</textarea>
+        <button class="se-btn se-btn-sm" id="se-ce-reset-prompt">Reset to Default</button>
+    </div>
+
+    <div class="se-ce-feedback-header">
+        <span class="se-ce-field-label" style="margin:0;">Conflict Feedback</span>
+        <span class="se-ce-fb-note">(read-only — use Re-check to update)</span>
+    </div>
+    <div class="se-ce-feedback-body" id="se-ce-feedback-body">{{feedbackHtml}}</div>
+</div>
+<div class="se-ce-footer">
+    <span class="se-ce-format-note">&#9432; In .txt exports, formatting may be lost</span>
+    <span style="flex:1;"></span>
+    <button class="se-btn se-btn-sm" id="se-ce-cancel">Cancel</button>
+    <button class="se-btn se-btn-primary se-btn-sm" id="se-ce-save">Save (Ctrl+S)</button>
+</div>
