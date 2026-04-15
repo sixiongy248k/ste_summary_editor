@@ -608,47 +608,6 @@ function bindRowClickEvents($body) {
  */
 // ─── Date / time conversion helpers ─────────────
 
-/** mm/dd/yy → yyyy-MM-dd (for <input type="date">) */
-function toDateInputVal(str) {
-    if (!str) return '';
-    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/.exec(str.trim());
-    if (!m) return '';
-    const year = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
-    return `${year}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`;
-}
-
-/** yyyy-MM-dd → mm/dd/yy */
-function fromDateInputVal(str) {
-    if (!str) return '';
-    const [y, mo, d] = str.split('-');
-    return `${mo}/${d}/${String(y).slice(-2)}`;
-}
-
-/** hh:mm AM/PM → HH:MM (for <input type="time">) */
-function toTimeInputVal(str) {
-    if (!str) return '';
-    const m12 = /^(\d{1,2}):(\d{2})\s*(AM|PM)$/i.exec(str.trim());
-    if (m12) {
-        let h = Number(m12[1]);
-        if (m12[3].toUpperCase() === 'PM' && h !== 12) h += 12;
-        if (m12[3].toUpperCase() === 'AM' && h === 12) h = 0;
-        return `${String(h).padStart(2, '0')}:${m12[2]}`;
-    }
-    return /^\d{2}:\d{2}$/.test(str.trim()) ? str.trim() : '';
-}
-
-/** HH:MM → hh:mm AM/PM */
-function fromTimeInputVal(str) {
-    if (!str) return '';
-    const m = /^(\d{2}):(\d{2})$/.exec(str);
-    if (!m) return str;
-    let h = Number(m[1]);
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    if (h > 12) h -= 12;
-    if (h === 0) h = 12;
-    return `${String(h).padStart(2, '0')}:${m[2]} ${ampm}`;
-}
-
 // ─── Custom Date Picker ──────────────────────────────────────
 
 
@@ -757,15 +716,6 @@ function bindDatePickerEvents(pop, onSave) {
         const yy = String(viewYear).slice(-2);
         onSave(`${mm}/${dd}/${yy}`);
     });
-}
-
-/** Read the selected date from the picker as mm/dd/yy. */
-function readDatePicker(pop) {
-    const p = pop.querySelector('.se-datepicker');
-    if (!p) return '';
-    const { selDay: d, selMonth: mo, selYear: y } = p.dataset;
-    if (!d || d === 'undefined') return '';
-    return `${String(Number(mo) + 1).padStart(2, '0')}/${String(Number(d)).padStart(2, '0')}/${String(Number(y)).slice(-2)}`;
 }
 
 // ─── Custom Time Picker ──────────────────────────────────────

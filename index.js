@@ -57,7 +57,7 @@ import {
 import { addRangeLinks, removeRangeLinks, clearAllLinks, renderCausalPanel, toggleCausalPopover } from './src/editor/causality.js';
 import { openContentEditor, closeContentEditor } from './src/editor/content-editor.js';
 import { openSplitDialog, closeSplitDialog } from './src/editor/split-entry.js';
-import { openIngestSplit, closeIngestSplit, swapIngestSplit, isIngestSplitOpen, openIngestPreview, closeIngestPreview } from './src/ingest/ingest-split.js';
+import { closeIngestSplit, swapIngestSplit, openIngestPreview, closeIngestPreview } from './src/ingest/ingest-split.js';
 import { isCharacterBlocked, bindBlacklistEvents, refreshBlockedState } from './src/integration/blacklist.js';
 import {
     registerPrompt, getPrompt, seedDefaultPrompts,
@@ -506,7 +506,7 @@ function bindIngestEvents() {
     $(document).on('click', '.se-file-item.problematic', function () {
         const fileName = $(this).data('file');
         if (!fileName || !state.fileRawContent.has(fileName)) return;
-        swapIngestSplit(fileName, (resolvedFile) => {
+        swapIngestSplit(fileName, (_resolvedFile) => {
             renderIngestSummary();
             renderTable();
             updateTabBadges();

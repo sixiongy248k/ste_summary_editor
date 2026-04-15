@@ -248,7 +248,7 @@ async function callConflictAPI(prompt, systemContext = '') {
  */
 function extractJsonArray(raw) {
     // 1. Strip markdown fences
-    let text = raw.replaceAll(/`{3,}[a-z]*\s*/gi, '').trim();
+    const text = raw.replaceAll(/`{3,}[a-z]*\s*/gi, '').trim();
 
     // 2. Try direct parse
     try {

@@ -39,11 +39,12 @@ jobs:
             --exclude "*.log" \
             --exclude "key.pat" \
             --exclude ".scannerwork/*"
-          echo "ZIP_NAME=$ZIP_NAME" >> "$GITHUB_ENV"
+          echo "SAFE_REF=$SAFE_REF" >> "$GITHUB_ENV"
+          echo "SHORT_SHA=$SHORT_SHA" >> "$GITHUB_ENV"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: summary-editor-${{ github.ref_name }}-${{ github.sha }}
+          name: summary-editor-${{ env.SAFE_REF }}-${{ env.SHORT_SHA }}
           path: "*.zip"
           retention-days: 14

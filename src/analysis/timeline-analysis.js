@@ -100,7 +100,7 @@ export function closeTimelinePanel() {
  * Run the LLM timeline analysis and display results in the panel.
  * @param {boolean} [fromPanel=false] Called from the Re-run button inside the panel.
  */
-export async function runTimelineAnalysis(fromPanel = false) {
+export async function runTimelineAnalysis(_fromPanel = false) {
     if (!hasTimelineFiles()) return;
     if (!_panel) openTimelinePanel();
 

@@ -31,7 +31,7 @@ function generatePillColors(count, field) {
     if (count === 0) return [];
     // Deterministic-ish starting hue per field so it's stable across opens
     const seedMap = { date: 0, time: 120, location: 240 };
-    let hue = (seedMap[field] || 0) + (Math.random() * 60 - 30); // slight randomness
+    const hue = (seedMap[field] || 0) + (Math.random() * 60 - 30); // slight randomness
     const step = 360 / Math.max(count, 6); // spread across hue wheel
     const colors = [];
     for (let i = 0; i < count; i++) {
