@@ -35,6 +35,9 @@ desktop.ini
 .sonarwork/
 .scannerwork/
 
+# Internal notes folder — local only
+notes/
+
 # Internal markdown docs — only README.md is public
 *.md
 !README.md
