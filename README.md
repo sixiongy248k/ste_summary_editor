@@ -50,7 +50,7 @@ https://github.com/sixiongy248k/ste_summary_editor
    ```
 3. Restart SillyTavern → enable **Summary Editor** in the Extensions panel
 
-### Option 3: Deploy script (dev workflow)
+### Option 3: Deploy script
 
 ```powershell
 # PowerShell
@@ -127,97 +127,6 @@ bash deploy.sh --clean
 
 ---
 
-## Development
-
-### Requirements
-
-- [Node.js](https://nodejs.org) 18+ (for linting and CI tooling)
-- [GitHub CLI](https://cli.github.com) (`gh`) — for PR creation and workflow triggers
-- PowerShell 5.1+ (Windows) or Bash (WSL/Git Bash/macOS/Linux)
-
-### Setup
-
-```bash
-npm install
-```
-
-### Dev toolkit (interactive, no flags needed)
-
-```powershell
-# Windows
-.\dev.ps1
-```
-```bash
-# Bash / WSL
-bash dev.sh
-```
-
-The script menu covers:
-
-| Option | Action |
-|--------|--------|
-| Sync with main | `git fetch` + `rebase` onto origin/main |
-| New feature branch | Stash if dirty → pull main → create branch |
-| Stash changes | Auto-generates stash name: `wip/branch/YYYY-MM-DD-description` |
-| Push branch | `git push -u origin <branch>` |
-| Open Pull Request | `gh pr create` with auto-filled title |
-| Push + open PR | Both at once |
-| Deploy to SillyTavern | Runs `deploy.ps1 --clean` |
-| Trigger release workflow | `gh workflow run release.yml` |
-| Create manual tag | Interactive patch/minor/major bump |
-
-### Linting
-
-```bash
-npm run lint        # check
-npm run lint:fix    # auto-fix
-```
-
-### Deploying locally
-
-```powershell
-powershell -ExecutionPolicy Bypass -File deploy.ps1 --clean
-```
-
----
-
-## CI/CD
-
-All workflows live in [`.github/workflows/`](.github/workflows/).
-
-| Workflow | Trigger | What it does |
-|----------|---------|--------------|
-| `ci.yml` | Every push + PRs to main | ESLint → build ZIP artifact (14-day retention) |
-| `release.yml` | Push to `main` or manual dispatch | semantic-release → version bump → GitHub Release + ZIP |
-
-### Commit conventions (drive auto-versioning)
-
-semantic-release reads conventional commits to determine the next version:
-
-| Commit prefix | Version bump |
-|--------------|-------------|
-| `feat: ...` | Minor — `0.X.0` |
-| `fix: ...` | Patch — `0.0.X` |
-| `feat!:` or body contains `BREAKING CHANGE:` | Major — `X.0.0` |
-| `chore:` `docs:` `style:` `refactor:` | No bump |
-
-**Examples:**
-```
-feat: add entity sidebar with entry-count badges
-fix: spawn panel at center instead of screen edge
-chore: update deploy script
-```
-
-### Release artifacts
-
-Every merge to `main` that contains a `feat:` or `fix:` commit will automatically:
-1. Bump the version in `manifest.json`
-2. Update `CHANGELOG.md`
-3. Create a GitHub Release with a `summary-editor-release.zip` attachment
-4. Tag the commit `vX.Y.Z`
-
----
-
 ## Project Structure
 
 ```
@@ -226,9 +135,10 @@ summary-editor/
 ├── index.js                   Entry point (thin orchestrator)
 ├── style.css                  All styles (Monokai dark palette)
 ├── settings.html              ST Extensions panel drawer
-├── dev.ps1 / dev.sh           Interactive dev toolkit
+├── dev.ps1 / dev.sh           Interactive dev toolkit (see configs/DEV.md)
 ├── deploy.ps1 / deploy.sh     Deploy to local ST installation
 ├── configs/
+│   ├── DEV.md                 Dev toolkit usage guide
 │   ├── SILLYTAVERN_NOTES.md   ST environment notes
 │   └── WISHLIST.md            Future feature ideas
 ├── lib/

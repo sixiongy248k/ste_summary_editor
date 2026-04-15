@@ -34,3 +34,9 @@ desktop.ini
 # SonarQube
 .sonarwork/
 .scannerwork/
+
+# Internal dev docs — not for public repo
+configs/INFO.md
+
+# Personal IDE workspace files
+*.code-workspace
