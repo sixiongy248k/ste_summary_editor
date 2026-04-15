@@ -372,34 +372,13 @@ export async function handleExport(rewordFn) {
 }
 
 /**
- * Build clipboard text based on current selection state.
- * - Partial selection → selected entries only
- * - All selected or no selection → full export
- * @returns {string}
- */
-function buildClipboardContent() {
-    const format = $('#se-export-format').val() || 'txt';
-    const selCount = state.selected.size;
-    const totalCount = state.entries.size;
-
-    // Partial selection → only selected entries
-    if (selCount > 0 && selCount < totalCount) {
-        const selected = [...state.selected]
-            .map(n => state.entries.get(n)).filter(Boolean)
-            .sort((a, b) => a.num - b.num);
-        return buildExportContentFrom(selected, format);
-    }
-
-    // All selected or no selection → full export
-    return buildExportContent(format);
-}
-
-/**
  * Copy export content to clipboard.
- * Respects current table selection: partial → selected entries, else full export.
+ * Uses the same scoped entries as the full preview — respects the active scope button
+ * (All / Selected / Arc), so what you see in the preview is exactly what gets copied.
  */
 export async function copyToClipboard() {
-    const content = buildClipboardContent();
+    const format = $('#se-export-format').val() || 'txt';
+    const content = buildExportContentFrom(getScopedEntries(), format);
 
     try {
         await navigator.clipboard.writeText(content);
