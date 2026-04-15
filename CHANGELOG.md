@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/sixiongy248k/ste_summary_editor/compare/v1.0.0...v1.0.1) (2026-04-15)
+
+
+### Bug Fixes
+
+* copy to clipboard mirrors live preview selection ([d9ffbb9](https://github.com/sixiongy248k/ste_summary_editor/commit/d9ffbb9a1c566c844d55e46ff7fa8b7f3e9c7ed2))
+* copy to clipboard now uses scoped entries matching the full preview ([5fa3f70](https://github.com/sixiongy248k/ste_summary_editor/commit/5fa3f70db0dee532785776eeb563b18132f87d26))
+
 # 1.0.0 (2026-04-15)
 
 
