@@ -27,6 +27,7 @@ EXT_FOLDER="summary-editor"
 # ──────────────────────────────────────────────
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SOURCE_DIR="$(dirname "$SCRIPT_DIR")"
 SCRIPT_PATH="${SCRIPT_DIR}/deploy.sh"
 
 # Files and folders to copy (excludes deploy scripts, CLAUDE.md, .git, etc.)
@@ -118,7 +119,7 @@ copy_extension() {
     mkdir -p "$target"
 
     for item in "${INCLUDE_ITEMS[@]}"; do
-        local src="${SCRIPT_DIR}/${item}"
+        local src="${SOURCE_DIR}/${item}"
         local dest="${target}/${item}"
 
         if [[ -e "$src" ]]; then
@@ -158,7 +159,7 @@ TARGET_DIR="${ST_EXTENSIONS_DIR}/${EXT_FOLDER}"
 
 echo ""
 cyan "Summary Editor — Deploy Script"
-echo "Source:  $SCRIPT_DIR"
+echo "Source:  $SOURCE_DIR"
 echo "Target:  $TARGET_DIR"
 echo ""
 

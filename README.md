@@ -54,11 +54,11 @@ https://github.com/Alphonsos88k/ste_summary_editor
 
 ```powershell
 # PowerShell
-powershell -ExecutionPolicy Bypass -File deploy.ps1 --clean
+powershell -ExecutionPolicy Bypass -File scripts/deploy.ps1 --clean
 ```
 ```bash
 # Bash / WSL / Git Bash
-bash deploy.sh --clean
+bash scripts/deploy.sh --clean
 ```
 
 ---
@@ -135,8 +135,9 @@ summary-editor/
 ├── index.js                   Entry point (thin orchestrator)
 ├── style.css                  All styles (Monokai dark palette)
 ├── settings.html              ST Extensions panel drawer
-├── dev.ps1 / dev.sh           Interactive dev toolkit (see notes/DEV.md)
-├── deploy.ps1 / deploy.sh     Deploy to local ST installation
+├── scripts/
+│   ├── dev.ps1 / dev.sh       Interactive dev toolkit (see notes/DEV.md)
+│   └── deploy.ps1 / deploy.sh Deploy to local ST installation
 ├── notes/                     Internal dev notes (gitignored)
 │   ├── DEV.md                 Dev toolkit usage guide
 │   ├── WORKFLOW.md            Git/CI/CD workflow reference

@@ -163,7 +163,7 @@ function Invoke-OpenPR {
     $title = (Read-Host "  PR title [$defaultTitle]").Trim()
     if (!$title) { $title = $defaultTitle }
 
-    $patFile = Join-Path $PSScriptRoot 'key.pat'
+    $patFile = Join-Path (Split-Path $PSScriptRoot -Parent) 'key.pat'
     if (!(Test-Path $patFile)) { err 'key.pat not found — cannot create PR via API.'; return }
     $token = (Get-Content $patFile).Trim()
 
@@ -215,7 +215,7 @@ function Invoke-Deploy {
 }
 
 function Invoke-TriggerRelease {
-    $patFile = Join-Path $PSScriptRoot 'key.pat'
+    $patFile = Join-Path (Split-Path $PSScriptRoot -Parent) 'key.pat'
     if (!(Test-Path $patFile)) { err 'key.pat not found — cannot trigger workflow via API.'; return }
     $token    = (Get-Content $patFile).Trim()
     $repoUrl  = (git remote get-url origin 2>$null) -replace '\.git$', ''

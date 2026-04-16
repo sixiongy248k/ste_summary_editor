@@ -35,7 +35,7 @@ $ST_EXTENSIONS_DIR = "E:\AI\STORY_AI\latestsilly_tavern\SillyTavern\public\scrip
 $EXT_FOLDER = "summary-editor"
 # ----------------------------------------------
 
-$SourceDir = $PSScriptRoot
+$SourceDir = Split-Path $PSScriptRoot -Parent
 
 # -- Handle --set-path ------------------------
 
@@ -52,7 +52,7 @@ if ($setPath) {
     }
 
     # Read the current script content and replace the path line
-    $scriptPath = Join-Path $SourceDir "deploy.ps1"
+    $scriptPath = Join-Path $PSScriptRoot "deploy.ps1"
     $content = Get-Content $scriptPath -Raw
     $replacement = '$ST_EXTENSIONS_DIR = "' + $resolvedPath + '"'
     $content = $content -replace '(?m)^\$ST_EXTENSIONS_DIR\s*=\s*"[^"]*"', $replacement
