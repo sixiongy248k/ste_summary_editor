@@ -444,19 +444,18 @@ function bindCoreEvents() {
     });
 
     // Footer navigation — undoable tab changes
-    const TAB_NAMES_NAV = ['Ingest', 'Review', 'Edit', 'Export'];
     $('#se-footer-back').on('click', () => {
         if (state.activeTab > 0) {
             const prev = state.activeTab;
             switchTab(prev - 1);
-            pushUndo(`Go back to ${TAB_NAMES_NAV[prev]} tab`, () => { switchTab(prev); updateUndoButton(); });
+            pushUndo(`Go back to ${TAB_NAMES[prev]} tab`, () => { switchTab(prev); updateUndoButton(); });
         }
     });
     $('#se-footer-next').on('click', () => {
         if (state.activeTab < 3) {
             const prev = state.activeTab;
             switchTab(prev + 1);
-            pushUndo(`Go back to ${TAB_NAMES_NAV[prev]} tab`, () => { switchTab(prev); updateUndoButton(); });
+            pushUndo(`Go back to ${TAB_NAMES[prev]} tab`, () => { switchTab(prev); updateUndoButton(); });
         }
     });
 }
