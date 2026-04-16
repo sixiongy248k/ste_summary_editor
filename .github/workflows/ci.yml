@@ -8,7 +8,7 @@ on:
 
 jobs:
   lint:
-    name: Lint
+    name: linter
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,7 +20,7 @@ jobs:
       - run: npm run lint
 
   build:
-    name: Build ZIP
+    name: build_extension_pkgs
     runs-on: ubuntu-latest
     needs: lint
     steps:
