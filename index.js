@@ -14,10 +14,10 @@
  */
 
 // ─── Core modules ───
-import { EXT_NAME, STORAGE_KEY, TABLE_COLS } from './src/core/constants.js';
+import { EXT_NAME, STORAGE_KEY, TABLE_COLS, TEMPLATES } from './src/core/constants.js';
 import { state, persistState, snapshotState, restoreSnapshot } from './src/core/state.js';
 import { debounce, makeDraggable, escHtml, escAttr, spawnPanel, registerPanel } from './src/core/utils.js';
-import { loadTemplate, preloadAllTemplates } from './src/core/template-loader.js';
+import { loadTemplate, fillTemplate, preloadAllTemplates } from './src/core/template-loader.js';
 
 // ─── Feature modules ───
 import { handleFileInput, removeFile } from './src/ingest/ingestion.js';
@@ -77,6 +77,17 @@ registerPrompt(
 // ─── Tailwind CDN & Libraries ───
 import { configureTailwind } from './lib/tailwind-config.js';
 import { closeColorPicker, isColorPickerOpen } from './src/arcs/color-picker.js';
+
+// ─────────────────────────────────────────────
+//  Panel template cache (populated during init)
+// ─────────────────────────────────────────────
+
+let _tplUtilsPanel      = '';
+let _tplFindReplace     = '';
+let _tplBulkFill        = '';
+let _tplGapSuggest      = '';
+let _tplNewEntryPrompt  = '';
+let _tplFileItem        = '';
 
 // ─────────────────────────────────────────────
 //  Undo helpers
@@ -212,6 +223,17 @@ jQuery(async () => {
         loadIroJS(),
         preloadAllTemplates(),
     ]);
+
+    // Cache panel templates (preloadAllTemplates already fetched them)
+    [_tplUtilsPanel, _tplFindReplace, _tplBulkFill, _tplGapSuggest, _tplNewEntryPrompt, _tplFileItem] =
+        await Promise.all([
+            loadTemplate(TEMPLATES.UTILS_PANEL),
+            loadTemplate(TEMPLATES.FIND_REPLACE_PANEL),
+            loadTemplate(TEMPLATES.BULK_FILL_PANEL),
+            loadTemplate(TEMPLATES.GAP_SUGGEST_PANEL),
+            loadTemplate(TEMPLATES.NEW_ENTRY_PROMPT),
+            loadTemplate(TEMPLATES.FILE_ITEM),
+        ]);
 
     // Initialize template-dependent modules
     await Promise.all([
@@ -731,17 +753,7 @@ function bindReviewEvents() {
         _utilsPanel = document.createElement('div');
         _utilsPanel.id = 'se-utils-panel';
         _utilsPanel.className = 'se-utils-panel';
-        _utilsPanel.innerHTML = `
-            <div class="se-utils-header">
-                <span class="se-utils-title">&#9965; Utilities</span>
-                <button class="se-close-circle se-utils-close">&times;</button>
-            </div>
-            <div class="se-utils-body">
-                <button class="se-btn se-utils-item" id="se-btn-find-replace">&#128270; Find &amp; Replace</button>
-                <button class="se-btn se-utils-item" id="se-btn-entity-sidebar">&#128100; Named Entities</button>
-                <button class="se-btn se-utils-item" id="se-btn-tag-browser">&#127991; Tag Browser</button>
-                <button class="se-btn se-utils-item" id="se-causal-btn" title="View and manage causal links between entries">&#x26D3; Causal Links<span class="se-causal-btn-badge" id="se-causal-btn-badge" style="display:none;"></span> <span class="se-info-icon se-causal-info-icon" id="se-causal-info-icon">&#9432;</span></button>
-            </div>`;
+        _utilsPanel.innerHTML = _tplUtilsPanel;
         overlay.appendChild(_utilsPanel);
         const btn = document.getElementById('se-btn-utils');
         const rect = btn ? btn.getBoundingClientRect() : { left: 100, bottom: 80 };
@@ -978,22 +990,9 @@ function insertNewEntry() {
 function showNewEntryPrompt(num) {
     $('#se-new-entry-prompt').remove();
 
-    const $panel = $(`
-        <div id="se-new-entry-prompt" class="se-new-entry-prompt">
-            <div class="se-new-entry-prompt-header" id="se-nep-header">
-                <span>New Entry <span class="se-new-entry-prompt-num">#${num}</span></span>
-                <button class="se-close-circle" id="se-nep-close">&times;</button>
-            </div>
-            <div class="se-new-entry-prompt-body">
-                <textarea id="se-nep-content" class="se-new-entry-prompt-textarea"
-                    placeholder="Enter content for entry #${num} (leave blank to keep empty)…" rows="4"></textarea>
-            </div>
-            <div class="se-new-entry-prompt-footer">
-                <button class="se-btn se-btn-sm se-btn-primary" id="se-nep-save">Save</button>
-                <button class="se-btn se-btn-sm" id="se-nep-skip">Skip</button>
-            </div>
-        </div>
-    `).appendTo('#se-modal-overlay');
+    const $panel = $('<div id="se-new-entry-prompt" class="se-new-entry-prompt">')
+        .html(fillTemplate(_tplNewEntryPrompt, { num }))
+        .appendTo('#se-modal-overlay');
 
     const overlayEl2 = document.getElementById('se-modal-overlay');
     spawnPanel($panel[0], overlayEl2, '#se-nep-header', 360, 200);
@@ -1569,22 +1568,7 @@ function openFindReplace() {
     const panel = document.createElement('div');
     panel.id = 'se-find-replace';
     panel.className = 'se-find-replace';
-    panel.innerHTML =
-        '<div class="se-fr-header">' +
-        '<span class="se-fr-title">Find &amp; Replace</span>' +
-        '<button class="se-close-circle se-fr-close" title="Close">&times;</button>' +
-        '</div>' +
-        '<div class="se-fr-body">' +
-        '<input type="text" class="se-fr-input" id="se-fr-search" placeholder="Find..." autocomplete="off" />' +
-        '<input type="text" class="se-fr-input" id="se-fr-replace" placeholder="Replace with..." autocomplete="off" />' +
-        '<div class="se-fr-row">' +
-        '<label class="se-fr-case-label"><input type="checkbox" id="se-fr-case" /> Case sensitive</label>' +
-        '<span class="se-fr-count" id="se-fr-count"></span>' +
-        '</div>' +
-        '<div class="se-fr-actions">' +
-        '<button class="se-btn se-btn-sm" id="se-fr-replace-all">Replace All</button>' +
-        '</div>' +
-        '</div>';
+    panel.innerHTML = _tplFindReplace;
 
     const overlayEl = document.getElementById('se-modal-overlay');
     overlayEl.appendChild(panel);
@@ -1661,19 +1645,7 @@ function openBulkFill() {
     const panel = document.createElement('div');
     panel.id = 'se-bulk-fill';
     panel.className = 'se-find-replace'; // reuse same card style
-    panel.innerHTML =
-        '<div class="se-fr-header">' +
-        `<span class="se-fr-title">Bulk Fill (${state.selected.size} entries)</span>` +
-        '<button class="se-close-circle se-fr-close" title="Close">&times;</button>' +
-        '</div>' +
-        '<div class="se-fr-body">' +
-        '<input type="text" class="se-fr-input" id="se-bf-date" placeholder="Date (leave blank to skip)" />' +
-        '<input type="text" class="se-fr-input" id="se-bf-time" placeholder="Time (leave blank to skip)" />' +
-        '<input type="text" class="se-fr-input" id="se-bf-location" placeholder="Location (leave blank to skip)" />' +
-        '<div class="se-fr-actions">' +
-        '<button class="se-btn se-btn-sm se-btn-primary" id="se-bf-apply">Apply to Selected</button>' +
-        '</div>' +
-        '</div>';
+    panel.innerHTML = fillTemplate(_tplBulkFill, { count: state.selected.size });
 
     const bfOverlay = document.getElementById('se-modal-overlay');
     bfOverlay.appendChild(panel);
@@ -1735,19 +1707,7 @@ async function openGapSuggest(num) {
     panel.id = panelId;
     panel.className = 'se-find-replace';
     panel.style.width = '320px';
-    panel.innerHTML =
-        `<div class="se-fr-header" id="${panelId}-hdr">` +
-        `  <span class="se-fr-title">&#10024; Suggest for #${num}</span>` +
-        `  <button class="se-prompt-edit-btn" data-edit-prompt="gap-suggest" title="Edit prompt">&#9881;</button>` +
-        `  <button class="se-close-circle" id="${panelId}-close">&times;</button>` +
-        '</div>' +
-        '<div class="se-fr-body">' +
-        `  <div id="${panelId}-loading" style="color:var(--se-muted);font-size:0.85em;padding:2px 0;">Generating suggestion&#8230;</div>` +
-        `  <textarea id="${panelId}-text" class="se-fr-input" rows="4" style="display:none;resize:vertical;"></textarea>` +
-        `  <div class="se-fr-actions" id="${panelId}-actions" style="display:none;">` +
-        `    <button class="se-btn se-btn-primary" id="${panelId}-use">Use this</button>` +
-        '  </div>' +
-        '</div>';
+    panel.innerHTML = fillTemplate(_tplGapSuggest, { panelId, num });
 
     const gapOverlay = document.getElementById('se-modal-overlay');
     gapOverlay.appendChild(panel);
@@ -1824,14 +1784,13 @@ function renderIngestSummary() {
             cls = ' invalid';
             icon = '&#9432;'; // ℹ info circle
         }
-        const $row = $(
-            `<div class="se-file-item${cls}" data-file="${escAttr(file.name)}">` +
-            `<span class="se-file-status">${icon}</span>` +
-            `<span class="se-file-name">${escHtml(file.name)}</span>` +
-            `<span class="se-file-count">${file.entryCount}</span>` +
-            `<button class="se-close-circle se-file-remove" title="Remove file">&times;</button>` +
-            '</div>'
-        );
+        const $row = $(fillTemplate(_tplFileItem, {
+            cls,
+            icon,
+            nameAttr: escAttr(file.name),
+            name:     escHtml(file.name),
+            count:    file.entryCount,
+        }));
         $list.append($row);
     }
 

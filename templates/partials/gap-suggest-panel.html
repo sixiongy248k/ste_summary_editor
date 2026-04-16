@@ -1,0 +1,12 @@
+<div class="se-fr-header" id="{{panelId}}-hdr">
+    <span class="se-fr-title">&#10024; Suggest for #{{num}}</span>
+    <button class="se-prompt-edit-btn" data-edit-prompt="gap-suggest" title="Edit prompt">&#9881;</button>
+    <button class="se-close-circle" id="{{panelId}}-close">&times;</button>
+</div>
+<div class="se-fr-body">
+    <div id="{{panelId}}-loading" style="color:var(--se-muted);font-size:0.85em;padding:2px 0;">Generating suggestion&#8230;</div>
+    <textarea id="{{panelId}}-text" class="se-fr-input" rows="4" style="display:none;resize:vertical;"></textarea>
+    <div class="se-fr-actions" id="{{panelId}}-actions" style="display:none;">
+        <button class="se-btn se-btn-primary" id="{{panelId}}-use">Use this</button>
+    </div>
+</div>

@@ -147,4 +147,10 @@ export const TEMPLATES = Object.freeze({
     TB_TAB:                  'partials/tb-tab',
     TB_PILL:                 'partials/tb-pill',
     TB_PANEL:                'partials/tb-panel',
+    UTILS_PANEL:             'partials/utils-panel',
+    FIND_REPLACE_PANEL:      'partials/find-replace-panel',
+    BULK_FILL_PANEL:         'partials/bulk-fill-panel',
+    GAP_SUGGEST_PANEL:       'partials/gap-suggest-panel',
+    NEW_ENTRY_PROMPT:        'partials/new-entry-prompt',
+    FILE_ITEM:               'partials/file-item',
 });
