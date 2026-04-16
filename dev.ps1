@@ -155,9 +155,7 @@ function Invoke-PushBranch {
 function Invoke-OpenPR {
     $branch = Get-Branch
     if ($branch -eq $MAIN_BRANCH) { err 'Not on a feature branch.'; return }
-    if (!(Get-Command gh -ErrorAction SilentlyContinue)) {
-        err 'GitHub CLI not found — install from https://cli.github.com'; return
-    }
+
     $remoteExists = git rev-parse --verify "$REMOTE/$branch" 2>$null
     if (!$remoteExists) { info 'Not pushed yet — pushing first...'; git push -u $REMOTE $branch }
 
@@ -165,8 +163,25 @@ function Invoke-OpenPR {
     $title = (Read-Host "  PR title [$defaultTitle]").Trim()
     if (!$title) { $title = $defaultTitle }
 
-    gh pr create --title $title --fill --base $MAIN_BRANCH
-    if ($LASTEXITCODE -eq 0) { ok 'PR created.' } else { err 'gh pr create failed.' }
+    $patFile = Join-Path $PSScriptRoot 'key.pat'
+    if (!(Test-Path $patFile)) { err 'key.pat not found — cannot create PR via API.'; return }
+    $token = (Get-Content $patFile).Trim()
+
+    $repoUrl   = (git remote get-url origin 2>$null) -replace '\.git$', ''
+    $repoPath  = $repoUrl -replace 'https://github.com/', ''
+
+    $payload = @{ title = $title; head = $branch; base = $MAIN_BRANCH; body = '' } | ConvertTo-Json
+    try {
+        $resp = Invoke-RestMethod `
+            -Uri "https://api.github.com/repos/$repoPath/pulls" `
+            -Method Post `
+            -Headers @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json' } `
+            -Body $payload `
+            -ContentType 'application/json'
+        ok "PR created: $($resp.html_url)"
+    } catch {
+        err "PR creation failed: $_"
+    }
 }
 
 function Invoke-PushAndPR { Invoke-PushBranch; if ($LASTEXITCODE -eq 0) { Invoke-OpenPR } }
@@ -200,10 +215,24 @@ function Invoke-Deploy {
 }
 
 function Invoke-TriggerRelease {
-    if (!(Get-Command gh -ErrorAction SilentlyContinue)) { err 'GitHub CLI not found.'; return }
-    gh workflow run release.yml --ref $MAIN_BRANCH
-    if ($LASTEXITCODE -eq 0) { ok "Release workflow triggered on $MAIN_BRANCH." }
-    else { err 'Failed to trigger workflow.' }
+    $patFile = Join-Path $PSScriptRoot 'key.pat'
+    if (!(Test-Path $patFile)) { err 'key.pat not found — cannot trigger workflow via API.'; return }
+    $token    = (Get-Content $patFile).Trim()
+    $repoUrl  = (git remote get-url origin 2>$null) -replace '\.git$', ''
+    $repoPath = $repoUrl -replace 'https://github.com/', ''
+
+    $payload = @{ ref = $MAIN_BRANCH } | ConvertTo-Json
+    try {
+        Invoke-RestMethod `
+            -Uri "https://api.github.com/repos/$repoPath/actions/workflows/release.yml/dispatches" `
+            -Method Post `
+            -Headers @{ Authorization = "Bearer $token"; Accept = 'application/vnd.github+json' } `
+            -Body $payload `
+            -ContentType 'application/json' | Out-Null
+        ok "Release workflow triggered on $MAIN_BRANCH."
+    } catch {
+        err "Failed to trigger workflow: $_"
+    }
 }
 
 function Invoke-CreateTag {
