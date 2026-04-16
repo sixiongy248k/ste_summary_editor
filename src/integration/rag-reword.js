@@ -21,12 +21,7 @@ import { registerPrompt, getPrompt } from '../core/system-prompts.js';
 
 const PROMPT_KEY = 'rag-reword';
 
-registerPrompt(
-    PROMPT_KEY,
-    'RAG Reword',
-    'Rewrite this story summary entry for RAG retrieval clarity. ' +
-    'One sentence max. Do not alter bracket metadata. Entry: ',
-);
+registerPrompt(PROMPT_KEY, 'RAG Reword');
 
 /**
  * Reword all entries using ST's active model for RAG optimization.

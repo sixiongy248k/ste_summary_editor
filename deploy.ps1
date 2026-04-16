@@ -96,7 +96,8 @@ $IncludeItems = @(
     "README.md",
     "src",
     "lib",
-    "templates"
+    "templates",
+    "configs"
 )
 
 function Remove-Extension {

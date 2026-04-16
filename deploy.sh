@@ -39,6 +39,7 @@ INCLUDE_ITEMS=(
     "src"
     "lib"
     "templates"
+    "configs"
 )
 
 # ── Color helpers ─────────────────────────────

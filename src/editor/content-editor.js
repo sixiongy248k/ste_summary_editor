@@ -20,12 +20,8 @@ import { TEMPLATES, SEV_CSS } from '../core/constants.js';
 import { registerPrompt, getPrompt, setPrompt } from '../core/system-prompts.js';
 
 const PROMPT_KEY = 'content-editor';
-const DEFAULT_SYSTEM_PROMPT =
-    'You are a story editor. Review this summary entry and the conflict feedback below, ' +
-    'then rewrite the content to resolve any issues while keeping the narrative style concise and clear. ' +
-    'Return only the rewritten entry text — no preamble, no commentary.';
 
-registerPrompt(PROMPT_KEY, 'Content Editor Revise', DEFAULT_SYSTEM_PROMPT);
+registerPrompt(PROMPT_KEY, 'Content Editor Revise');
 
 // ─── Template cache ───────────────────────────────
 

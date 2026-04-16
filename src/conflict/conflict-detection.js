@@ -19,58 +19,9 @@ let $storyCtxEl = null;
 
 // ─── Prompt registration ─────────────────────────────────────────────────────
 
-registerPrompt(
-    'conflict-check',
-    'Conflict Check',
-    `You are a story consistency analyzer and writing coach. You will receive numbered story summary entries. Analyze each for inconsistencies AND suggest improvements.
+registerPrompt('conflict-check', 'Conflict Check', '', { warnJson: true });
 
-Look for:
-- LOCATION CONFLICTS: Character in one place then impossibly somewhere else
-- TEMPORAL CONFLICTS: Time doesn't flow logically between entries
-- ENTITY CONFLICTS: A character's title, name, or attribute changes without explanation
-- FACTUAL CONFLICTS: Details directly contradict between entries
-- NARRATIVE FLOW: Events that don't make sense in sequence
-- DUPLICATE CONTENT: Entries that say essentially the same thing
-
-IMPORTANT CONTEXT RULES:
-- You may receive a SUBSET of entries (e.g. starting at #23 instead of #1). Do NOT flag missing preceding context as an error — earlier entries simply were not included.
-- If an entry references events or characters not introduced in the provided set, that is likely missing context, NOT a conflict. Only flag it as "info" severity at most.
-- Focus on contradictions BETWEEN the entries you were given, not gaps from entries you were not given.
-
-Respond ONLY with a valid JSON array. No markdown fences, no text outside the JSON.
-Return ONE item per entry you analyzed. Each item must have:
-{
-  "entry": <number>,
-  "text": "<the specific phrase in question, or a brief snippet if OK>",
-  "criticism": ["<issue 1>", "<issue 2>"],
-  "feedback": ["<actionable change 1>", "<option or alternative>"],
-  "severity": "error" | "warning" | "info" | "ok"
-}
-
-"criticism" — short bullet-point strings identifying what's wrong, referencing other entry numbers involved. For "ok" entries, use an empty array [].
-"feedback" — an array of short, actionable bullet points. Each bullet is one concrete change: what to fix, reword, or clarify. Give options where applicable (e.g. "Consider X or Y"). For "ok" entries, use ["No changes needed."].
-
-severity guide:
-- "error": Direct factual contradiction between entries
-- "warning": Suspicious inconsistency that may need attention
-- "info": Minor note, possible missing context, or stylistic concern
-- "ok": Entry is consistent — no issues found
-
-You MUST include every entry you received in your response, even if it has no issues. Mark clean entries with "ok" severity so the user knows they were reviewed.`,
-    { warnJson: true },
-);
-
-registerPrompt(
-    'story-context',
-    'Story Context Generation',
-    'You are a story archivist. Based on the numbered summary entries provided, write a compact narrative overview (150–250 words) covering:\n' +
-    '- Main characters and their current circumstances\n' +
-    '- Key events that have occurred\n' +
-    '- Important locations and world details\n' +
-    '- Relationships and recent dynamics between characters\n\n' +
-    'Write in present-tense prose. No headers or lists — flowing narrative summary only.\n' +
-    'This context will help an AI analyze new entries for consistency with the established story world.',
-);
+registerPrompt('story-context', 'Story Context Generation');
 
 // ─── Analysis Log ────────────────────────
 
