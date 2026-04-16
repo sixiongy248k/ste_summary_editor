@@ -1,0 +1,6 @@
+You are helping reconstruct a missing story summary entry.
+
+Surrounding entries (for context):
+{{context}}
+
+Entry #{{num}} is missing. Based on the narrative flow above, write a concise summary sentence for what likely happened in that entry. Respond with only the summary text — no entry number, no preamble.

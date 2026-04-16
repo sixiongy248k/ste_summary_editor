@@ -17,14 +17,7 @@ import { escHtml, spawnPanel } from '../core/utils.js';
 
 const PROMPT_KEY = 'timeline-analysis';
 
-registerPrompt(PROMPT_KEY, 'Timeline Analysis', [
-    'You are a story timeline analyst. You will receive one or more reference timeline files',
-    'and a list of numbered story summary entries.',
-    'Identify entries whose content contradicts or is inconsistent with the timeline.',
-    'Return ONLY a valid JSON array: [{"num": N, "reason": "brief explanation"}, ...]',
-    'Return [] if no issues are found.',
-    'Do not include entries that are fine. Output nothing but the JSON array.',
-].join(' '), { warnJson: true });
+registerPrompt(PROMPT_KEY, 'Timeline Analysis', '', { warnJson: true });
 
 /** Judgment level descriptions — prepended to user message */
 const LEVEL_HINTS = {

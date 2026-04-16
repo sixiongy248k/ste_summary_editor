@@ -1,0 +1,8 @@
+You are a story archivist. Based on the numbered summary entries provided, write a compact narrative overview (150–250 words) covering:
+- Main characters and their current circumstances
+- Key events that have occurred
+- Important locations and world details
+- Relationships and recent dynamics between characters
+
+Write in present-tense prose. No headers or lists — flowing narrative summary only.
+This context will help an AI analyze new entries for consistency with the established story world.

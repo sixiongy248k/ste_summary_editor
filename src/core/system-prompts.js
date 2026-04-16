@@ -12,11 +12,15 @@
  * Call `seedDefaultPrompts()` once after `loadPersistedState()` to fill in missing keys.
  */
 
+import { EXT_NAME } from './constants.js';
 import { state } from './state.js';
 import { escHtml, spawnPanel } from './utils.js';
 
 /** Separate localStorage key so prompts survive the main state clear on page load. */
 const PROMPTS_KEY = 'se-system-prompts-v1';
+
+/** Base URL for prompt text files. */
+const PROMPTS_BASE = `/scripts/extensions/third-party/${EXT_NAME}/configs/prompts`;
 
 /** @type {Array<{key: string, label: string, defaultText: string, warnJson: boolean}>} */
 const _registry = [];
@@ -84,6 +88,20 @@ export function seedDefaultPrompts() {
     for (const { key, defaultText } of _registry) {
         state.systemPrompts[key] = key in saved ? saved[key] : defaultText;
     }
+}
+
+/**
+ * Fetch prompt default text from `configs/prompts/{key}.txt` for every registered prompt.
+ * Updates each registry entry's `defaultText` in place so `seedDefaultPrompts` picks it up.
+ * Call once during init, after all modules are imported but before `seedDefaultPrompts`.
+ */
+export async function loadPromptDefaults() {
+    await Promise.all(_registry.map(async (entry) => {
+        try {
+            const res = await fetch(`${PROMPTS_BASE}/${entry.key}.txt`);
+            if (res.ok) entry.defaultText = (await res.text()).trim();
+        } catch { /* keep empty default on network error */ }
+    }));
 }
 
 // ─── Single-prompt edit popup ─────────────────────────────────────────────────

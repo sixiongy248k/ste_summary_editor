@@ -60,19 +60,11 @@ import { openSplitDialog, closeSplitDialog } from './src/editor/split-entry.js';
 import { closeIngestSplit, swapIngestSplit, openIngestPreview, closeIngestPreview } from './src/ingest/ingest-split.js';
 import { isCharacterBlocked, bindBlacklistEvents, refreshBlockedState } from './src/integration/blacklist.js';
 import {
-    registerPrompt, getPrompt, seedDefaultPrompts,
+    registerPrompt, getPrompt, seedDefaultPrompts, loadPromptDefaults,
     openEditPromptPopup, openSystemPromptHub,
 } from './src/core/system-prompts.js';
 
-registerPrompt(
-    'gap-suggest',
-    'Gap Suggest',
-    'You are helping reconstruct a missing story summary entry.\n\n' +
-    'Surrounding entries (for context):\n{{context}}\n\n' +
-    'Entry #{{num}} is missing. Based on the narrative flow above, write a concise ' +
-    'summary sentence for what likely happened in that entry. ' +
-    'Respond with only the summary text — no entry number, no preamble.',
-);
+registerPrompt('gap-suggest', 'Gap Suggest');
 
 // ─── Tailwind CDN & Libraries ───
 import { configureTailwind } from './lib/tailwind-config.js';
@@ -247,7 +239,8 @@ jQuery(async () => {
     // Clear any stale persisted state — each page refresh starts fresh
     // (state only persists within a session via in-memory state object)
     localStorage.removeItem(STORAGE_KEY);
-    // Seed system prompts from their own persistent key (survives the clear above)
+    // Load prompt defaults from configs/prompts/*.txt, then seed into state
+    await loadPromptDefaults();
     seedDefaultPrompts();
     detectGaps();
     updateFilterDropdown();
