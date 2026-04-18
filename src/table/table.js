@@ -245,8 +245,10 @@ export function renderTable() {
     bindEditableCells($body);
     bindDragReorder($body);
 
-    // Append supplementary file rows after all regular entries
-    _renderSupplementaryRows($body, colSpan);
+    // Supplementary rows on last page only; Summary Files subheader on first page only
+    const isLastPage  = state.currentPage >= totalPages;
+    const isFirstPage = state.currentPage <= 1;
+    _renderSupplementaryRows($body, colSpan, isLastPage, isFirstPage && hasSupp && entries.length > 0);
 
     updatePaginationControls(totalPages);
     updateEntryCount();
@@ -263,12 +265,15 @@ export function renderTable() {
  * @param {jQuery} $body
  * @param {number} colSpan
  */
-function _renderSupplementaryRows($body, colSpan) {
+function _renderSupplementaryRows($body, colSpan, isLastPage = true, showSummaryHeader = false) {
     const filterVal = state.filterAct;
     const isAll  = filterVal === 'all';
     const isSuppFilter = typeof filterVal === 'string' && filterVal.startsWith('supp:');
 
     if (!isAll && !isSuppFilter) return;
+
+    // Supplementary rows only appear on the last page (except supp-only filter which has no pages)
+    if (!isSuppFilter && !isLastPage) return;
 
     const filterCat = isSuppFilter ? filterVal.slice(5) : null;
 
@@ -282,6 +287,14 @@ function _renderSupplementaryRows($body, colSpan) {
 
     // When filtered to supp-only, clear the "no entries match" placeholder
     if (isSuppFilter) $body.find('tr').remove();
+
+    // Add "Summary Files" subheader above entry rows when supp rows follow on same page
+    if (showSummaryHeader) {
+        $body.prepend(
+            `<tr class="se-supp-separator se-summary-header"><td colspan="${colSpan}">` +
+            `<span class="se-supp-separator-label">&#128221; Summary Files</span></td></tr>`
+        );
+    }
 
     $body.append(
         `<tr class="se-supp-separator"><td colspan="${colSpan}">` +
