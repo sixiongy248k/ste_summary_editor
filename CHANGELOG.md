@@ -1,3 +1,10 @@
+# 1.0.0 (2026-04-18)
+
+
+### Bug Fixes
+
+* use KEY_PAT for semantic-release and update CI job names for bra… ([#9](https://github.com/Alphonsos88k/ste_summary_editor/issues/9)) ([fbf838a](https://github.com/Alphonsos88k/ste_summary_editor/commit/fbf838a7950365fc304a2c93ebe3f8d3f974f239))
+* use KEY_PAT for semantic-release and update CI job names for branch protection ([1304129](https://github.com/Alphonsos88k/ste_summary_editor/commit/1304129f0e9c66395a246e61cc35c6a677b0f301))
 
 ## [1.0.2](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.0.1...v1.0.2) (2026-04-18)
 
