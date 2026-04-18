@@ -38,7 +38,7 @@ import { buildLocationBubbles } from './src/arcs/location-bubbles.js';
 import {
     handleExport, updateLivePreview,
     renderFullPreview, copyToClipboard, updateScopeCounts,
-    updateActScopeDropdown, downloadBySource, downloadAsZip,
+    updateActScopeDropdown, downloadBySource, downloadAsZip, triggerDestructiveExport,
 } from './src/export/export.js';
 import { handleDatabankInject } from './src/export/databank.js';
 import { rewordForRAG } from './src/integration/rag-reword.js';
@@ -56,6 +56,7 @@ import {
 } from './src/conflict/conflict-detection.js';
 import { addRangeLinks, removeRangeLinks, clearAllLinks, renderCausalPanel, toggleCausalPopover } from './src/editor/causality.js';
 import { openContentEditor, closeContentEditor } from './src/editor/content-editor.js';
+import { openBulkRefine, closeBulkRefine } from './src/editor/bulk-refine.js';
 import { openSplitDialog, closeSplitDialog } from './src/editor/split-entry.js';
 import { closeIngestSplit, swapIngestSplit, openIngestPreview, closeIngestPreview } from './src/ingest/ingest-split.js';
 import { isCharacterBlocked, bindBlacklistEvents, refreshBlockedState } from './src/integration/blacklist.js';
@@ -387,6 +388,7 @@ function closeEditor() {
     closeEditPopover();
     closeAllPopovers();
     closeContentEditor();
+    closeBulkRefine();
     closeSplitDialog();
     persistState();
 }
@@ -464,7 +466,42 @@ function bindCoreEvents() {
  * Ingest tab events: file drop, browse, clear, continue.
  */
 function bindIngestEvents() {
-    $('#se-file-drop').on('click', () => $('#se-file-input').trigger('click'));
+    $('#se-file-drop').on('click', (e) => {
+        // If user clicked the "browse folder" link, trigger folder input instead
+        if ($(e.target).is('#se-folder-browse') || $(e.target).closest('#se-folder-browse').length) return;
+        $('#se-file-input').trigger('click');
+    });
+    $('#se-folder-browse').on('click', (e) => {
+        e.stopPropagation();
+        $('#se-folder-input').trigger('click');
+    });
+    async function _handleAnyFileInput(e) {
+        const snap = snapshotState();
+        await handleFileInput(e);
+        // Shared post-load refresh
+        const loadedCount = state.entries.size - snap.entries.size;
+        const fileCount = state.files.length - snap.files.length;
+        if (fileCount > 0) {
+            const label = `Load ${fileCount} file${fileCount !== 1 ? 's' : ''} (${loadedCount} entries)`;
+            pushUndo(label, () => {
+                restoreSnapshot(snap);
+                fullRefreshAfterUndo();
+            });
+        }
+        autoDetectTimelineFiles();
+        detectGaps();
+        updateFilterDropdown();
+        updateBulkActDropdown();
+        updateTabBadges();
+        renderIngestSummary();
+        if (state.files.length > 0) $('#se-file-drawer').addClass('open');
+    }
+
+    $('#se-folder-input').on('change', async (e) => {
+        await _handleAnyFileInput(e);
+        $('#se-folder-input').val('');
+    });
+
     $('#se-file-input').on('change', async (e) => {
         const snap = snapshotState();
         await handleFileInput(e);
@@ -724,6 +761,12 @@ function bindReviewEvents() {
         renderSelectionBar();
     });
 
+    document.addEventListener('se:supplementary-changed', () => {
+        updateFilterDropdown();
+        renderIngestSummary();
+        renderTable();
+    });
+
     $('#se-btn-create-act').on('click', createActFromSelection);
     $('#se-btn-move-entry').on('click', showMoveDialog);
     $('#se-btn-swap-entries').on('click', showSwapDialog);
@@ -758,8 +801,9 @@ function bindReviewEvents() {
             _utilsPanel?.remove(); _utilsPanel = null;
         });
         _utilsPanel.querySelector('#se-btn-find-replace').addEventListener('click', openFindReplace);
-        _utilsPanel.querySelector('#se-btn-entity-sidebar').addEventListener('click', toggleEntitySidebar);
+        _utilsPanel.querySelector('#se-btn-entity-panel').addEventListener('click', () => { _utilsPanel?.remove(); _utilsPanel = null; toggleEntitySidebar(); });
         _utilsPanel.querySelector('#se-btn-tag-browser').addEventListener('click', () => showTagBrowser(renderTable));
+        _utilsPanel.querySelector('#se-btn-bulk-refine').addEventListener('click', () => { _utilsPanel?.remove(); _utilsPanel = null; openBulkRefine(); });
     }
     $('#se-btn-utils').on('click', openUtilsPanel);
 
@@ -1464,6 +1508,7 @@ function bindExportEvents() {
     $('#se-btn-do-export').on('click', () => handleExport(rewordForRAG));
     $('#se-btn-export-by-source').on('click', downloadBySource);
     $('#se-btn-export-zip').on('click', downloadAsZip);
+    $('#se-btn-destructive-export').on('click', triggerDestructiveExport);
     $('#se-btn-databank-inject').on('click', handleDatabankInject);
 
     $('#se-btn-copy-clipboard').on('click', copyToClipboard);
@@ -1767,13 +1812,17 @@ function renderIngestSummary() {
     $list.empty();
 
     for (const file of state.files) {
-        let cls = '';
+        let cls  = '';
         let icon = '&#10003;';
         if (file.problematic) {
-            cls = ' problematic';
+            cls  = ' problematic';
             icon = '&#63;'; // ?
+        } else if (file.isSupplementaryCandidate) {
+            const isAssigned = state.supplementaryFiles.has(file.name) && !!state.supplementaryFiles.get(file.name)?.category;
+            cls  = isAssigned ? ' invalid supp-assigned' : ' invalid supp-candidate';
+            icon = isAssigned ? '&#10003;' : '&#9432;';
         } else if (!file.valid) {
-            cls = ' invalid';
+            cls  = ' invalid';
             icon = '&#9432;'; // ℹ info circle
         }
         const $row = $(fillTemplate(_tplFileItem, {

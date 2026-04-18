@@ -334,7 +334,13 @@ function processFile(text, fileName, validFiles, invalidFiles, duplicates) {
     }
 
     if (!isSummaryFilename(fileName)) {
-        invalidFiles.push({ name: fileName, reason: 'Filename not recognized \u2014 must contain \u201csum\u201d and a digit', rawContent: text });
+        // Non-summary filename: tag as supplementary candidate so user can categorise it
+        invalidFiles.push({
+            name: fileName,
+            reason: 'Not a summary file \u2014 assign a category to use as supplementary',
+            rawContent: text,
+            isSupplementaryCandidate: true,
+        });
         return;
     }
 
@@ -358,7 +364,13 @@ function processFile(text, fileName, validFiles, invalidFiles, duplicates) {
     } else if (ext === 'yaml' || ext === 'yml') {
         invalidFiles.push({ name: fileName, reason: 'Malformed YAML \u2014 could not parse valid entries', rawContent: text });
     } else {
-        invalidFiles.push({ name: fileName, reason: 'No valid structure \u2014 no numbered entries or part headers found', rawContent: text });
+        // .txt with no numbered/part structure: offer as supplementary candidate
+        invalidFiles.push({
+            name: fileName,
+            reason: 'Not a summary file \u2014 assign a category to use as supplementary',
+            rawContent: text,
+            isSupplementaryCandidate: true,
+        });
     }
 }
 
@@ -429,7 +441,7 @@ export async function handleFileInput(event) {
             name: f.name, entryCount: f.count, valid: true,
             mode: f.mode, problematic: f.problematic || false,
         })),
-        ...invalidFiles.map(f => ({ name: f.name, entryCount: 0, valid: false, problematic: false, rejectReason: f.reason })),
+        ...invalidFiles.map(f => ({ name: f.name, entryCount: 0, valid: false, problematic: false, rejectReason: f.reason, isSupplementaryCandidate: f.isSupplementaryCandidate || false })),
     ];
 
     detectGaps();
@@ -635,6 +647,7 @@ export function removeFile(fileName) {
     state.files = state.files.filter(f => f.name !== fileName);
     state.sourceFileNames = state.sourceFileNames.filter(n => n !== fileName);
     state.fileRawContent.delete(fileName);
+    state.supplementaryFiles.delete(fileName);
 }
 
 /**

@@ -658,6 +658,56 @@ function crc32(data) {
 }
 
 /**
+ * Destructive export: download each source file with its original filename,
+ * intended for saving over the originals. Shows double confirmation and
+ * offers a backup ZIP before proceeding.
+ */
+export async function triggerDestructiveExport() {
+    const grouped = groupEntriesBySource();
+
+    if (grouped.size === 0) {
+        alert('No entries to export.');
+        return;
+    }
+
+    const fileCount = grouped.size;
+    const noun = fileCount === 1 ? 'file' : 'files';
+
+    const warnOk = confirm(
+        `\u26a0 DESTRUCTIVE EXPORT\n\n` +
+        `This will download ${fileCount} ${noun} named to match your originals.\n` +
+        `Saving them to the same folder will overwrite the source files.\n\n` +
+        `Would you like to download a backup ZIP before continuing?\n\n` +
+        `OK \u2192 Download backup ZIP then proceed\n` +
+        `Cancel \u2192 Abort`
+    );
+    if (!warnOk) return;
+
+    await downloadAsZip();
+
+    const finalOk = confirm(
+        `Backup downloaded.\n\n` +
+        `Proceed with downloading ${fileCount} ${noun} for overwriting?\n\n` +
+        `This cannot be undone once you replace the originals.`
+    );
+    if (!finalOk) return;
+
+    const format = $('#se-export-format').val() || 'txt';
+    const mime = format === 'json' ? 'application/json' : 'text/plain';
+    let ext = '.txt';
+    if (format === 'json') ext = '.json';
+    else if (format === 'md') ext = '.md';
+
+    let delay = 0;
+    for (const [fileName, entries] of grouped) {
+        const content = buildContentForEntries(entries, format);
+        const name = fileName.replace(/\.[^.]+$/, '') + ext;
+        setTimeout(() => downloadFile(name, content, mime), delay);
+        delay += 300;
+    }
+}
+
+/**
  * Derive the base filename for exports.
  */
 function getExportBaseName() {

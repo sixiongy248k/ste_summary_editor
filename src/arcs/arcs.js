@@ -880,8 +880,17 @@ export function closeAllPopovers() {
     closeColorPicker();
 }
 
+/** Supplementary category labels — mirrors files-panel SUPP_CATEGORIES. */
+const SUPP_FILTER_LABELS = {
+    'character-notes': 'Character Notes',
+    'personalities':   'Personalities',
+    'world-details':   'World Details',
+    'timeline-notes':  'Timeline Notes',
+    'others':          'Others',
+};
+
 /**
- * Update the act filter dropdown with current act names.
+ * Update the act filter dropdown with current act names and supplementary categories.
  */
 export function updateFilterDropdown() {
     const $filter = $('#se-filter');
@@ -891,6 +900,17 @@ export function updateFilterDropdown() {
 
     for (const act of state.acts.values()) {
         $filter.append(`<option value="${act.id}">Act: ${escHtml(act.name)}</option>`);
+    }
+
+    // Add supplementary category options for assigned files
+    const usedCats = new Set([...state.supplementaryFiles.values()].map(f => f.category).filter(Boolean));
+    if (usedCats.size > 0) {
+        $filter.append('<option disabled>── Supplementary ──</option>');
+        $filter.append('<option value="supp:all">Supplementary: All</option>');
+        for (const cat of usedCats) {
+            const label = SUPP_FILTER_LABELS[cat] ?? cat;
+            $filter.append(`<option value="supp:${cat}">Supplementary: ${escHtml(label)}</option>`);
+        }
     }
 
     if ($filter.find(`option[value="${current}"]`).length) {

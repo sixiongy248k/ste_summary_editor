@@ -16,7 +16,7 @@
 
 import { ROWS_PER_PAGE, TEMPLATES, MONTH_NAMES } from '../core/constants.js';
 import { state, persistState } from '../core/state.js';
-import { escHtml, escAttr } from '../core/utils.js';
+import { escHtml, escAttr, spawnPanel } from '../core/utils.js';
 import { loadTemplate, fillTemplate } from '../core/template-loader.js';
 import { attachAutocomplete } from './tags.js';
 import { moveEntries } from './reorder.js';
@@ -117,6 +117,9 @@ export function getFilteredEntries() {
         entries = entries.filter(e => !e.isGap && state.selected.has(e.num));
     } else if (state.filterAct === 'unchecked') {
         entries = entries.filter(e => !e.isGap && !state.selected.has(e.num));
+    } else if (typeof state.filterAct === 'string' && state.filterAct.startsWith('supp:')) {
+        // Supplementary filter: hide all main entries — supp rows render separately below
+        entries = [];
     } else if (state.filterAct !== 'all') {
         const actId = Number.parseInt(state.filterAct, 10);
         entries = entries.filter(e => e.isGap || e.actId === actId);
@@ -241,12 +244,133 @@ export function renderTable() {
     bindEditableCells($body);
     bindDragReorder($body);
 
+    // Append supplementary file rows after all regular entries
+    _renderSupplementaryRows($body, colSpan);
+
     updatePaginationControls(totalPages);
     updateEntryCount();
     syncSelectAllCheckbox($body);
     updateUndoButton();
 
     $wrap.scrollTop(scrollTop);
+}
+
+/**
+ * Render supplementary file rows at the bottom of the table.
+ * These appear when filterAct is 'all' or matches a supp:* category.
+ * @param {jQuery} $body
+ * @param {number} colSpan
+ */
+function _renderSupplementaryRows($body, colSpan) {
+    const filterVal = state.filterAct;
+    const isAll  = filterVal === 'all';
+    const isSupp = typeof filterVal === 'string' && filterVal.startsWith('supp:');
+
+    if (!isAll && !isSupp) return;
+
+    const filterCat = isSupp ? filterVal.slice(5) : null; // e.g. 'character-notes' or 'all'
+
+    const suppList = [...state.supplementaryFiles.values()].filter(f => {
+        if (!f.category) return false;
+        if (filterCat && filterCat !== 'all') return f.category === filterCat;
+        return true;
+    });
+
+    if (suppList.length === 0) return;
+
+    // Separator row
+    $body.append(
+        `<tr class="se-supp-separator"><td colspan="${colSpan}">` +
+        `<span class="se-supp-separator-label">&#128196; Supplementary Files</span></td></tr>`
+    );
+
+    for (const supp of suppList) {
+        const content = supp.editedContent || supp.content;
+        const preview = escHtml(content.slice(0, 120)) + (content.length > 120 ? '…' : '');
+        const catLabel = escHtml(_suppCategoryLabel(supp.category));
+        const isEdited = supp.editedContent && supp.editedContent !== supp.content;
+
+        $body.append(
+            `<tr class="se-supp-row" data-supp-file="${escAttr(supp.name)}">` +
+            `<td></td>` +
+            `<td class="se-supp-icon-cell">&#128196;</td>` +
+            `<td><span class="se-supp-cat-badge se-supp-cat-${escAttr(supp.category)}">${catLabel}</span></td>` +
+            `<td colspan="${colSpan - 4}" class="se-supp-content-cell">` +
+            `<span class="se-supp-filename">${escHtml(supp.name)}</span>` +
+            (isEdited ? '<span class="se-supp-edited-badge">Modified</span>' : '') +
+            `<span class="se-supp-preview">${preview}</span>` +
+            `</td>` +
+            `<td><button class="se-btn se-btn-sm se-supp-edit-btn" data-supp-file="${escAttr(supp.name)}">Edit</button></td>` +
+            `</tr>`
+        );
+    }
+
+    // Bind edit buttons
+    $body.find('.se-supp-edit-btn').on('click', function (e) {
+        e.stopPropagation();
+        openSuppEditor($(this).data('supp-file'));
+    });
+}
+
+/** Human-readable labels for supplementary categories. */
+const SUPP_CATEGORY_LABELS = {
+    'character-notes': 'Character Notes',
+    'personalities':   'Personalities',
+    'world-details':   'World Details',
+    'timeline-notes':  'Timeline Notes',
+    'others':          'Others',
+};
+
+function _suppCategoryLabel(cat) {
+    return SUPP_CATEGORY_LABELS[cat] ?? cat;
+}
+
+/**
+ * Open a draggable editor dialog for a supplementary file's content.
+ * @param {string} fileName
+ */
+export function openSuppEditor(fileName) {
+    const supp = state.supplementaryFiles.get(fileName);
+    if (!supp) return;
+
+    document.getElementById('se-supp-editor')?.remove();
+
+    const overlay = document.getElementById('se-modal-overlay');
+    if (!overlay) return;
+
+    const content = supp.editedContent || supp.content;
+    const panel = document.createElement('div');
+    panel.id = 'se-supp-editor';
+    panel.className = 'se-supp-editor';
+    panel.innerHTML = `
+        <div class="se-se-header">
+            <span class="se-se-title">&#128196; ${escHtml(fileName)}</span>
+            <button class="se-close-circle se-se-close">&times;</button>
+        </div>
+        <div class="se-se-body">
+            <textarea class="se-se-textarea" id="se-se-content" spellcheck="true">${escHtml(content)}</textarea>
+        </div>
+        <div class="se-se-footer">
+            <button class="se-btn se-btn-sm se-se-revert" id="se-se-revert">Revert to Original</button>
+            <button class="se-btn se-btn-primary se-se-save" id="se-se-save">Save</button>
+        </div>`;
+
+    overlay.appendChild(panel);
+    spawnPanel(panel, overlay, '.se-se-header', 560, 480);
+
+    panel.querySelector('.se-se-close').addEventListener('click', () => panel.remove());
+    panel.querySelector('#se-se-save').addEventListener('click', () => {
+        supp.editedContent = panel.querySelector('#se-se-content').value;
+        persistState();
+        renderTable();
+        panel.remove();
+    });
+    panel.querySelector('#se-se-revert').addEventListener('click', () => {
+        panel.querySelector('#se-se-content').value = supp.content;
+    });
+    panel.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') panel.remove();
+    });
 }
 
 /**

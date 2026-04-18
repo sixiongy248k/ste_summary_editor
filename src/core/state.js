@@ -118,6 +118,20 @@ export const state = {
 
     /** @type {Array<{num: number, reason: string}>|null} Last timeline analysis results (session-only) */
     timelineAnalysisResults: null,
+
+    /**
+     * Supplementary files — non-summary files assigned a display category.
+     * Keyed by filename. Category determines where they appear in Review tab.
+     * @type {Map<string, {name: string, category: string, content: string, editedContent: string}>}
+     */
+    supplementaryFiles: new Map(),
+
+    /**
+     * AI-generated entity sections for the Story Index panel.
+     * Persisted so they survive re-opens. Cleared when entries are cleared.
+     * @type {Array<{key: string, title: string, items: Array<{name: string}>}>|null}
+     */
+    entitySections: null,
 };
 
 /**
@@ -142,7 +156,9 @@ export function persistState() {
             storyContext: state.storyContext,
             lastInjectHash: state.lastInjectHash,
             lastInjectArcHashes: state.lastInjectArcHashes,
-            timelineFiles: [...state.timelineFiles],
+            timelineFiles:    [...state.timelineFiles],
+        entitySections:   state.entitySections ?? null,
+        supplementaryFiles: [...state.supplementaryFiles.entries()].map(([k, v]) => [k, v]),
         };
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (err) {
@@ -218,7 +234,9 @@ export function loadPersistedState() {
         state.storyContext = data.storyContext || '';
         state.lastInjectHash = data.lastInjectHash || '';
         state.lastInjectArcHashes = data.lastInjectArcHashes || {};
-        state.timelineFiles = new Set(data.timelineFiles || []);
+        state.timelineFiles    = new Set(data.timelineFiles || []);
+        state.entitySections   = data.entitySections ?? null;
+        state.supplementaryFiles = new Map((data.supplementaryFiles || []).map(([k, v]) => [k, v]));
     } catch (err) {
         console.warn('[Summary Editor] Failed to load persisted state:', err);
     }

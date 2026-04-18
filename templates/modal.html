@@ -61,7 +61,7 @@
                 <div class="se-file-drop" id="se-file-drop">
                     <div class="se-drop-icon">&#128194;</div>
                     <p><strong>Drop summary files here</strong></p>
-                    <p>or click to browse</p>
+                    <p>or <span class="se-drop-link">browse files</span> &middot; <span class="se-drop-link se-drop-folder-link" id="se-folder-browse">browse folder</span></p>
                     <div class="se-file-formats">
                         Accepts .txt, .json, .yaml
                         <span class="se-info-icon" id="se-ingest-info">&#9432;</span>
@@ -309,6 +309,8 @@
 
         <!-- ─── Hidden File Input (for ingestion) ─── -->
         <input type="file" id="se-file-input" multiple accept=".txt,.json,.yaml,.yml" style="display:none;" />
+        <!-- ─── Hidden Folder Input (webkitdirectory = all files recursively) ─── -->
+        <input type="file" id="se-folder-input" webkitdirectory style="display:none;" />
 
     </div>
 
