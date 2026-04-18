@@ -1731,18 +1731,51 @@
 .se-tl-num { width: 70px; color: var(--se-cyan); font-weight: 600; }
 .se-tl-reason { color: var(--se-text); line-height: 1.45; }
 
-/* ── Supplementary Files (Review table rows) ───────────── */
+/* ── Section subheader rows (Review table) ──────────────── */
+.se-supp-separator {
+    pointer-events: none;
+    user-select: none;
+}
+.se-supp-separator:hover td { background: inherit !important; }
 .se-supp-separator td {
-    padding: 8px 12px 4px;
-    border-top: 1px solid #3e3d32;
+    padding: 7px 12px 5px;
 }
 .se-supp-separator-label {
-    font-size: 0.75em;
-    font-weight: 600;
-    color: #75715e;
-    letter-spacing: 0.6px;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.8px;
     text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
+
+/* Summary Files subheader — green diagonal-stripe */
+.se-summary-header td {
+    background:
+        repeating-linear-gradient(
+            -45deg,
+            transparent,
+            transparent 5px,
+            rgba(166,226,46,0.06) 5px,
+            rgba(166,226,46,0.06) 10px
+        ),
+        rgba(166,226,46,0.07);
+    border-top: 1px solid rgba(166,226,46,0.25);
+    border-bottom: 1px solid rgba(166,226,46,0.15);
+}
+.se-summary-header .se-supp-separator-label { color: #a6e22e; }
+
+/* Supplementary Files subheader — cyan dot-grid */
+.se-supp-separator:not(.se-summary-header) td {
+    background:
+        radial-gradient(circle, rgba(102,217,232,0.18) 1px, transparent 1px),
+        rgba(102,217,232,0.06);
+    background-size: 10px 10px, auto;
+    border-top: 1px solid rgba(102,217,232,0.25);
+    border-bottom: 1px solid rgba(102,217,232,0.15);
+}
+.se-supp-separator:not(.se-summary-header) .se-supp-separator-label { color: #66d9e8; }
 .se-supp-row {
     background: rgba(30,31,26,0.6);
     border-bottom: 1px solid #3e3d32;

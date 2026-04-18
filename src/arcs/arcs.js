@@ -896,10 +896,16 @@ export function updateFilterDropdown() {
     const $filter = $('#se-filter');
     const current = $filter.val();
 
-    $filter.find('option').not('[value="all"],[value="unassigned"],[value="gaps"]').remove();
+    $filter.find('option').not('[value="all"],[value="unassigned"],[value="gaps"],[value="checked"],[value="unchecked"]').remove();
 
     for (const act of state.acts.values()) {
         $filter.append(`<option value="${act.id}">Act: ${escHtml(act.name)}</option>`);
+    }
+
+    // "Summary: All" option — only when there are loaded entries
+    if (state.entries.size > 0) {
+        $filter.append('<option disabled>── Summary ──</option>');
+        $filter.append('<option value="summary:all">Summary: All</option>');
     }
 
     // Add supplementary category options for assigned files
