@@ -3,6 +3,22 @@
 
 ### Bug Fixes
 
+* summary files header now appears on page 1 regardless of page count ([ed84634](https://github.com/Alphonsos88k/ste_summary_editor/commit/ed8463452e75efb8b699accb5c85ec37ac91a04d))
+* supp rows on last page only, summary header on first page, live ingest preview refresh ([ac2a989](https://github.com/Alphonsos88k/ste_summary_editor/commit/ac2a989567d0f735a1eb78f4e2442de69b422541))
+* use KEY_PAT for semantic-release and update CI job names for bra… ([#9](https://github.com/Alphonsos88k/ste_summary_editor/issues/9)) ([fbf838a](https://github.com/Alphonsos88k/ste_summary_editor/commit/fbf838a7950365fc304a2c93ebe3f8d3f974f239))
+* use KEY_PAT for semantic-release and update CI job names for branch protection ([1304129](https://github.com/Alphonsos88k/ste_summary_editor/commit/1304129f0e9c66395a246e61cc35c6a677b0f301))
+
+
+### Features
+
+* supplementary files, timeline editor, entity heuristics, live ingest preview ([efb442c](https://github.com/Alphonsos88k/ste_summary_editor/commit/efb442ce0080ff010146a14bc735c0677dba979d))
+* themed subheader rows, Summary filter option, fix checked/unchecked preserved ([e59365d](https://github.com/Alphonsos88k/ste_summary_editor/commit/e59365de7bd6cecdb670f86fcb7116988521e2b6)), closes [#a6e22e](https://github.com/Alphonsos88k/ste_summary_editor/issues/a6e22e) [#66d9e8](https://github.com/Alphonsos88k/ste_summary_editor/issues/66d9e8)
+
+# 1.0.0 (2026-04-18)
+
+
+### Bug Fixes
+
 * use KEY_PAT for semantic-release and update CI job names for bra… ([#9](https://github.com/Alphonsos88k/ste_summary_editor/issues/9)) ([fbf838a](https://github.com/Alphonsos88k/ste_summary_editor/commit/fbf838a7950365fc304a2c93ebe3f8d3f974f239))
 * use KEY_PAT for semantic-release and update CI job names for branch protection ([1304129](https://github.com/Alphonsos88k/ste_summary_editor/commit/1304129f0e9c66395a246e61cc35c6a677b0f301))
 
