@@ -272,9 +272,6 @@ function _renderSupplementaryRows($body, colSpan, isLastPage = true, showSummary
 
     if (!isAll && !isSuppFilter) return;
 
-    // Supplementary rows only appear on the last page (except supp-only filter which has no pages)
-    if (!isSuppFilter && !isLastPage) return;
-
     const filterCat = isSuppFilter ? filterVal.slice(5) : null;
 
     const suppList = [...state.supplementaryFiles.values()].filter(f => {
@@ -285,16 +282,19 @@ function _renderSupplementaryRows($body, colSpan, isLastPage = true, showSummary
 
     if (suppList.length === 0) return;
 
-    // When filtered to supp-only, clear the "no entries match" placeholder
-    if (isSuppFilter) $body.find('tr').remove();
-
-    // Add "Summary Files" subheader above entry rows when supp rows follow on same page
+    // "Summary Files" subheader: prepend to page 1 entry rows (independent of last-page check)
     if (showSummaryHeader) {
         $body.prepend(
             `<tr class="se-supp-separator se-summary-header"><td colspan="${colSpan}">` +
             `<span class="se-supp-separator-label">&#128221; Summary Files</span></td></tr>`
         );
     }
+
+    // Supplementary rows only on the last page (supp-only filter bypasses pagination)
+    if (!isSuppFilter && !isLastPage) return;
+
+    // When filtered to supp-only, clear the "no entries match" placeholder
+    if (isSuppFilter) $body.find('tr').remove();
 
     $body.append(
         `<tr class="se-supp-separator"><td colspan="${colSpan}">` +
