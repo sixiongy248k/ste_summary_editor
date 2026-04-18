@@ -11,6 +11,7 @@
 
 ## Key Features
 
+
 | Feature | Description |
 |---------|-------------|
 | **4-Tab Workflow** | Ingest → Review → Edit → Export — each tab shows an item count badge |
