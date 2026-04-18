@@ -33,8 +33,16 @@
 
 ### Bug Fixes
 
-* use KEY_PAT for semantic-release and update CI job names for bra… ([#9](https://github.com/Alphonsos88k/ste_summary_editor/issues/9)) ([fbf838a](https://github.com/Alphonsos88k/ste_summary_editor/commit/fbf838a7950365fc304a2c93ebe3f8d3f974f239))
-* use KEY_PAT for semantic-release and update CI job names for branch protection ([1304129](https://github.com/Alphonsos88k/ste_summary_editor/commit/1304129f0e9c66395a246e61cc35c6a677b0f301))
+* summary files header now appears on page 1 regardless of page count ([ed84634](https://github.com/Alphonsos88k/ste_summary_editor/commit/ed8463452e75efb8b699accb5c85ec37ac91a04d))
+* supp rows on last page only, summary header on first page, live ingest preview refresh ([ac2a989](https://github.com/Alphonsos88k/ste_summary_editor/commit/ac2a989567d0f735a1eb78f4e2442de69b422541))
+
+
+### Features
+
+* supplementary files, timeline editor, entity heuristics, live ingest preview ([efb442c](https://github.com/Alphonsos88k/ste_summary_editor/commit/efb442ce0080ff010146a14bc735c0677dba979d))
+* themed subheader rows, Summary filter option, fix checked/unchecked preserved ([e59365d](https://github.com/Alphonsos88k/ste_summary_editor/commit/e59365de7bd6cecdb670f86fcb7116988521e2b6)), closes [#a6e22e](https://github.com/Alphonsos88k/ste_summary_editor/issues/a6e22e) [#66d9e8](https://github.com/Alphonsos88k/ste_summary_editor/issues/66d9e8)
+
+
 
 ## [1.0.2](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.0.1...v1.0.2) (2026-04-18)
 
@@ -105,15 +113,19 @@
 * copy to clipboard now uses scoped entries matching the full preview ([5fa3f70](https://github.com/Alphonsos88k/ste_summary_editor/commit/5fa3f70db0dee532785776eeb563b18132f87d26))
 
 
-# 1.0.0 (2026-04-15)
-
+# 1.0.0
 
 ### Bug Fixes
 
+* summary files header now appears on page 1 regardless of page count ([ed84634](https://github.com/Alphonsos88k/ste_summary_editor/commit/ed8463452e75efb8b699accb5c85ec37ac91a04d))
+* supp rows on last page only, summary header on first page, live ingest preview refresh ([ac2a989](https://github.com/Alphonsos88k/ste_summary_editor/commit/ac2a989567d0f735a1eb78f4e2442de69b422541))
 * add iro and mermaid to ESLint globals ([0ed1939](https://github.com/Alphonsos88k/ste_summary_editor/commit/0ed19392c2e8f7e7a279f65481b42fef2192ccca))
 * artifact name slash, clean up all lint warnings ([4ef305b](https://github.com/Alphonsos88k/ste_summary_editor/commit/4ef305b9b5654d00265cb74c4676f46271c8fcfc))
-
+* use KEY_PAT for semantic-release and update CI job names for bra… ([#9](https://github.com/Alphonsos88k/ste_summary_editor/issues/9)) ([fbf838a](https://github.com/Alphonsos88k/ste_summary_editor/commit/fbf838a7950365fc304a2c93ebe3f8d3f974f239))
+* use KEY_PAT for semantic-release and update CI job names for branch protection ([1304129](https://github.com/Alphonsos88k/ste_summary_editor/commit/1304129f0e9c66395a246e61cc35c6a677b0f301))
 
 ### Features
 
+* supplementary files, timeline editor, entity heuristics, live ingest preview ([efb442c](https://github.com/Alphonsos88k/ste_summary_editor/commit/efb442ce0080ff010146a14bc735c0677dba979d))
+* themed subheader rows, Summary filter option, fix checked/unchecked preserved ([e59365d](https://github.com/Alphonsos88k/ste_summary_editor/commit/e59365de7bd6cecdb670f86fcb7116988521e2b6)), closes [#a6e22e](https://github.com/Alphonsos88k/ste_summary_editor/issues/a6e22e) [#66d9e8](https://github.com/Alphonsos88k/ste_summary_editor/issues/66d9e8)
 * add -Action flag to dev scripts for non-interactive use ([4b28d56](https://github.com/Alphonsos88k/ste_summary_editor/commit/4b28d5662993ebdaf325477c8858f4e3b53a8dec))
