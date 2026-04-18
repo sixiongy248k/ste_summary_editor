@@ -25,7 +25,7 @@ import { detectGaps } from './src/ingest/gap-detection.js';
 import {
     initTable, renderTable, getTotalPages,
     renderStatsBar, renderWarningBanner, renderSelectionBar,
-    closeEditPopover, setContentCellClickHandler, updateUndoButton,
+    closeEditPopover, setContentCellClickHandler, updateUndoButton, openSuppEditor,
 } from './src/table/table.js';
 import {
     initActs, updateActButtonState, createActFromSelection,
@@ -50,6 +50,7 @@ import { showTagBrowser } from './src/table/tags.js';
 import { toggleEntitySidebar, setEntityFilterCallback } from './src/table/entity-sidebar.js';
 import { toggleFilesPanel, refreshFilesPanel } from './src/ingest/files-panel.js';
 import { autoDetectTimelineFiles, hasTimelineFiles, openTimelinePanel, runTimelineAnalysis } from './src/analysis/timeline-analysis.js';
+import { openTimelineEditor, closeTimelineEditor } from './src/analysis/timeline-editor.js';
 import {
     runConflictCheck, clearConflicts, renderApiStatus, showAnalysisLog,
     showFeedbackDetail,
@@ -58,7 +59,7 @@ import { addRangeLinks, removeRangeLinks, clearAllLinks, renderCausalPanel, togg
 import { openContentEditor, closeContentEditor } from './src/editor/content-editor.js';
 import { openBulkRefine, closeBulkRefine } from './src/editor/bulk-refine.js';
 import { openSplitDialog, closeSplitDialog } from './src/editor/split-entry.js';
-import { closeIngestSplit, swapIngestSplit, openIngestPreview, closeIngestPreview } from './src/ingest/ingest-split.js';
+import { closeIngestSplit, swapIngestSplit, openIngestPreview, closeIngestPreview, refreshIngestPreviewIfOpen } from './src/ingest/ingest-split.js';
 import { isCharacterBlocked, bindBlacklistEvents, refreshBlockedState } from './src/integration/blacklist.js';
 import {
     registerPrompt, getPrompt, seedDefaultPrompts, loadPromptDefaults,
@@ -389,6 +390,7 @@ function closeEditor() {
     closeAllPopovers();
     closeContentEditor();
     closeBulkRefine();
+    closeTimelineEditor();
     closeSplitDialog();
     persistState();
 }
@@ -583,8 +585,7 @@ function bindIngestEvents() {
     // Timeline analysis toolbar button
     $('#se-btn-timeline').on('click', () => {
         if (hasTimelineFiles()) {
-            openTimelinePanel();
-            runTimelineAnalysis();
+            openTimelineEditor();
         }
     });
 
@@ -605,7 +606,7 @@ function bindIngestEvents() {
     });
 
     // Click OK file → open read-only preview panel
-    $(document).on('click', '.se-file-item:not(.problematic):not(.invalid)', function () {
+    $(document).on('click', '.se-file-item:not(.problematic):not(.invalid):not(.supp-candidate):not(.supp-assigned)', function () {
         const fileName = $(this).data('file');
         if (!fileName) return;
         openIngestPreview(fileName);
@@ -617,6 +618,14 @@ function bindIngestEvents() {
         if (!fileName) return;
         const file = state.files.find(f => f.name === fileName);
         openIngestPreview(fileName, file?.rejectReason || 'Unrecognized file');
+    });
+
+    // Click supplementary candidate or assigned — show file content in right panel
+    $(document).on('click', '.se-file-item.supp-candidate, .se-file-item.supp-assigned', function () {
+        const fileName = $(this).data('file');
+        if (!fileName) return;
+        const file = state.files.find(f => f.name === fileName);
+        openIngestPreview(fileName, file?.rejectReason || '');
     });
 }
 
@@ -765,6 +774,7 @@ function bindReviewEvents() {
         updateFilterDropdown();
         renderIngestSummary();
         renderTable();
+        refreshIngestPreviewIfOpen();
     });
 
     $('#se-btn-create-act').on('click', createActFromSelection);
@@ -1819,7 +1829,7 @@ function renderIngestSummary() {
             icon = '&#63;'; // ?
         } else if (file.isSupplementaryCandidate) {
             const isAssigned = state.supplementaryFiles.has(file.name) && !!state.supplementaryFiles.get(file.name)?.category;
-            cls  = isAssigned ? ' invalid supp-assigned' : ' invalid supp-candidate';
+            cls  = isAssigned ? ' supp-assigned' : ' supp-candidate';
             icon = isAssigned ? '&#10003;' : '&#9432;';
         } else if (!file.valid) {
             cls  = ' invalid';

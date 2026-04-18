@@ -57,10 +57,14 @@ export function toggleTimelineFile(filename) {
     persistState();
 }
 
-/** @returns {boolean} Whether any timeline file is currently marked */
+/** @returns {boolean} Whether any timeline file is marked, including timeline-notes supplementary files */
 export function hasTimelineFiles() {
-    return state.timelineFiles.size > 0 &&
-        [...state.timelineFiles].some(n => state.files.some(f => f.name === n && f.valid));
+    // Supplementary files assigned as timeline-notes always count
+    for (const f of (state.supplementaryFiles?.values() ?? [])) {
+        if (f.category === 'timeline-notes') return true;
+    }
+    // Legacy: valid summary files explicitly marked as timeline
+    return [...state.timelineFiles].some(n => state.files.some(f => f.name === n && f.valid));
 }
 
 /**

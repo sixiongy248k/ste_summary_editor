@@ -12,7 +12,7 @@
  */
 
 import { state } from '../core/state.js';
-import { toggleTimelineFile, hasTimelineFiles } from '../analysis/timeline-analysis.js';
+import { toggleTimelineFile } from '../analysis/timeline-analysis.js';
 import { escHtml, escAttr, makeDraggable, spawnPanel, registerPanel } from '../core/utils.js';
 
 /** Supplementary categories available for non-summary files. */
@@ -114,19 +114,27 @@ function _handleRadioChange(radio) {
     if (!row) return;
     const filename = row.dataset.file;
     const value    = radio.value;
-    const isTl     = state.timelineFiles.has(filename);
 
-    if (value === 'timeline' && !isTl) toggleTimelineFile(filename);
-    if (value !== 'timeline' && isTl)  toggleTimelineFile(filename);
-
-    if (value !== 'supplementary') {
+    if (value === 'supplementary') {
+        if (!state.supplementaryFiles.has(filename)) {
+            const rawContent = state.fileRawContent?.get(filename) || '';
+            state.supplementaryFiles.set(filename, {
+                name:          filename,
+                category:      '',
+                content:       rawContent,
+                editedContent: rawContent,
+            });
+        }
+    } else {
+        // Leaving supplementary → clear timeline too if it was timeline-notes
+        const prev = state.supplementaryFiles.get(filename);
+        if (prev?.category === 'timeline-notes' && state.timelineFiles.has(filename)) {
+            toggleTimelineFile(filename);
+        }
         state.supplementaryFiles.delete(filename);
-        document.dispatchEvent(new CustomEvent('se:supplementary-changed'));
     }
 
-    const tlBtn = document.getElementById('se-btn-timeline');
-    if (tlBtn) tlBtn.disabled = !hasTimelineFiles();
-
+    document.dispatchEvent(new CustomEvent('se:supplementary-changed'));
     _renderRows();
 }
 
@@ -135,15 +143,25 @@ function _handleCategoryChange(sel) {
     if (!row) return;
     const filename = row.dataset.file;
     const category = sel.value;
+    const existing = state.supplementaryFiles.get(filename);
+
+    // Auto-toggle timelineFiles based on whether category is timeline-notes
+    const wasTl = state.timelineFiles.has(filename);
+    const isTl  = category === 'timeline-notes';
+    if (isTl && !wasTl)  toggleTimelineFile(filename);
+    if (!isTl && wasTl)  toggleTimelineFile(filename);
 
     if (category) {
         const rawContent = state.fileRawContent.get(filename) || '';
-        const existing   = state.supplementaryFiles.get(filename);
         state.supplementaryFiles.set(filename, {
             name:          filename,
             category,
             content:       rawContent,
             editedContent: existing?.editedContent ?? rawContent,
+            date:          existing?.date     ?? '',
+            time:          existing?.time     ?? '',
+            location:      existing?.location ?? '',
+            notes:         existing?.notes    ?? '',
         });
     } else {
         state.supplementaryFiles.delete(filename);
@@ -165,17 +183,16 @@ function _renderRows() {
     body.innerHTML = state.files.map(file => _buildFileRow(file)).join('');
 }
 
-function _fileStatusIcon(file, isSupp) {
+function _fileStatusIcon(file, isAssigned) {
     if (file.problematic)              return { icon: '?',       cls: 'se-fp-status-warn'          };
-    if (file.isSupplementaryCandidate) return isSupp
+    if (file.isSupplementaryCandidate) return isAssigned
         ? { icon: '&#10003;', cls: 'se-fp-status-supp-assigned' }
         : { icon: '&#9432;',  cls: 'se-fp-status-supp'          };
     if (!file.valid)                   return { icon: '&#9432;', cls: 'se-fp-status-invalid'        };
     return { icon: '&#10003;', cls: '' };
 }
 
-function _buildSuppRadio(file, radioName, isSupp) {
-    if (!file.isSupplementaryCandidate) return '';
+function _buildSuppRadio(radioName, isSupp) {
     const checked = isSupp ? 'checked' : '';
     return `<label class="se-fp-mode-label">
         <input type="radio" name="${escAttr(radioName)}" value="supplementary" ${checked}><span>Supplementary</span>
@@ -196,38 +213,54 @@ function _buildCatSelect(isSupp, suppEntry) {
     </div>`;
 }
 
+function _buildAssignedBadge(suppEntry) {
+    if (!suppEntry) return '';
+    if (suppEntry.category) {
+        return `<span class="se-fp-supp-badge se-fp-supp-badge-assigned">Supplementary &middot; ${escHtml(_suppLabel(suppEntry.category))}</span>`;
+    }
+    return `<span class="se-fp-supp-badge se-fp-supp-badge-pending">choose category</span>`;
+}
+
 function _buildFileRow(file) {
-    const isTimeline = file.valid && state.timelineFiles.has(file.name);
     const suppEntry  = state.supplementaryFiles.get(file.name);
     const isSupp     = !!suppEntry;
+    const isAssigned = isSupp && !!suppEntry.category;
     const radioName  = 'fp-mode-' + file.name.replaceAll(/[^a-zA-Z0-9]/g, '_');
 
-    const { icon: statusIcon, cls: statusClass } = _fileStatusIcon(file, isSupp);
+    const { icon: statusIcon, cls: statusClass } = _fileStatusIcon(file, isAssigned);
 
     let rowClass = '';
-    if (isTimeline)  rowClass = ' se-fp-timeline';
-    else if (isSupp) rowClass = ' se-fp-supplementary';
+    if (isAssigned) rowClass = ' se-fp-supplementary';
+    else if (isSupp) rowClass = ' se-fp-supp-pending';
 
-    const noneChecked = !isTimeline && !isSupp ? 'checked' : '';
-    const tlChecked   = isTimeline ? 'checked' : '';
+    const noneChecked = isSupp ? '' : 'checked';
     const countBadge  = file.entryCount > 0 ? `<span class="se-fp-count">${file.entryCount}</span>` : '';
-    const suppBadge   = suppEntry?.category ? `<span class="se-fp-supp-badge">${escHtml(_suppLabel(suppEntry.category))}</span>` : '';
+    const assignBadge = _buildAssignedBadge(suppEntry);
+
+    // Valid summary files have no assignment options — they're ingested as-is
+    if (file.valid) {
+        return `
+        <div class="se-fp-file-row" data-file="${escAttr(file.name)}">
+            <div class="se-fp-file-info">
+                <span class="se-fp-status ${statusClass}">${statusIcon}</span>
+                <span class="se-fp-filename">${escHtml(file.name)}</span>
+                ${countBadge}
+            </div>
+        </div>`;
+    }
 
     return `
         <div class="se-fp-file-row${rowClass}" data-file="${escAttr(file.name)}">
             <div class="se-fp-file-info">
                 <span class="se-fp-status ${statusClass}">${statusIcon}</span>
                 <span class="se-fp-filename">${escHtml(file.name)}</span>
-                ${countBadge}${suppBadge}
+                ${countBadge}${assignBadge}
             </div>
             <div class="se-fp-modes">
                 <label class="se-fp-mode-label">
                     <input type="radio" name="${escAttr(radioName)}" value="none" ${noneChecked}><span>Default</span>
                 </label>
-                <label class="se-fp-mode-label">
-                    <input type="radio" name="${escAttr(radioName)}" value="timeline" ${tlChecked}><span>Timeline</span>
-                </label>
-                ${_buildSuppRadio(file, radioName, isSupp)}
+                ${_buildSuppRadio(radioName, isSupp)}
             </div>
             ${_buildCatSelect(isSupp, suppEntry)}
         </div>`;

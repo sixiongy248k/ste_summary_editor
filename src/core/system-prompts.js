@@ -86,7 +86,10 @@ export function seedDefaultPrompts() {
     let saved = {};
     try { saved = JSON.parse(localStorage.getItem(PROMPTS_KEY) || '{}'); } catch { /* ignore */ }
     for (const { key, defaultText } of _registry) {
-        state.systemPrompts[key] = key in saved ? saved[key] : defaultText;
+        // Only use saved value if it is non-empty; otherwise fall back to the registered default.
+        // This ensures that adding a default to a previously-blank prompt populates it on next load.
+        const savedVal = key in saved ? saved[key] : '';
+        state.systemPrompts[key] = savedVal.trim() ? savedVal : (defaultText ?? '');
     }
 }
 

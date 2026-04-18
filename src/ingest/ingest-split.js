@@ -17,6 +17,15 @@ import { renderTable, renderSelectionBar } from '../table/table.js';
 import { shiftEntriesUp } from '../table/reorder.js';
 import { loadTemplate, fillTemplate } from '../core/template-loader.js';
 import { TEMPLATES } from '../core/constants.js';
+const _SUPP_LABELS = {
+    'character-notes': 'Character Notes',
+    'personalities':   'Personalities',
+    'world-details':   'World Details',
+    'timeline-notes':  'Timeline Notes',
+    'others':          'Others',
+};
+function _suppCategoryLabel(cat) { return _SUPP_LABELS[cat] ?? cat; }
+
 /** Visually distinct colors for segment highlighting (shared palette). */
 const SEGMENT_COLORS = [
     '#ff6b6b', '#ffd93d', '#6bcb77', '#4d96ff', '#f72585',
@@ -28,6 +37,7 @@ const SEGMENT_COLORS = [
 let segments = [];
 let colorIndex = 0;
 let activeFileName = null;
+let _activePreviewFileName = null;
 
 /** Patterns to strip common header prefixes from split pieces (case-insensitive). */
 const HEADER_PREFIXES = [
@@ -366,6 +376,7 @@ function trimHeaderPrefix(text) {
 export async function openIngestPreview(fileName, rejectReason) {
     closeIngestPreview();
     closeIngestSplit();
+    _activePreviewFileName = fileName;
 
     await ensureTemplates();
 
@@ -375,7 +386,25 @@ export async function openIngestPreview(fileName, rejectReason) {
     let content;
     let rejectBlock = '';
 
-    if (rejectReason) {
+    const suppEntry = state.supplementaryFiles?.get(fileName);
+    if (suppEntry) {
+        // Supplementary file — show raw/edited content with category status pill
+        content = suppEntry.editedContent || suppEntry.content || state.fileRawContent.get(fileName) || '(empty file)';
+        if (suppEntry.category) {
+            const catLabel = _suppCategoryLabel(suppEntry.category);
+            rejectBlock =
+                '<div class="se-ipp-reject se-ipp-supp-assigned">' +
+                `<span class="se-ipp-supp-pill">&#10003; Supplementary &middot; ${escHtml(catLabel)}</span>` +
+                '</div>';
+        } else {
+            rejectBlock =
+                '<div class="se-ipp-reject">' +
+                '<label class="se-ipp-reject-label">' +
+                '<input type="checkbox" checked disabled /> ' +
+                escHtml(rejectReason || 'Not a summary file \u2014 assign a category to use as supplementary') +
+                '</label></div>';
+        }
+    } else if (rejectReason) {
         // Invalid file — show raw content from cache
         const raw = state.fileRawContent.get(fileName) || '';
         content = raw || '(empty file)';
@@ -413,5 +442,19 @@ export async function openIngestPreview(fileName, rejectReason) {
 
 /** Close and remove the read-only preview panel. */
 export function closeIngestPreview() {
+    _activePreviewFileName = null;
     document.getElementById('se-ingest-preview-panel')?.remove();
+}
+
+/**
+ * If an ingest preview panel is currently open, re-open it for the same file.
+ * Called when supplementary file state changes so the pill refreshes in real time.
+ */
+export function refreshIngestPreviewIfOpen() {
+    if (!_activePreviewFileName) return;
+    const name = _activePreviewFileName;
+    // Determine reject reason for non-supp invalid files
+    const fileObj = state.files.find(f => f.name === name);
+    const rejectReason = fileObj && !fileObj.valid ? fileObj.rejectReason : undefined;
+    openIngestPreview(name, rejectReason);
 }

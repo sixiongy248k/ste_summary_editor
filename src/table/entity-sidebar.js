@@ -26,7 +26,13 @@ import { escHtml, escAttr, spawnPanel } from '../core/utils.js';
 import { registerPrompt, getPrompt } from '../core/system-prompts.js';
 
 const PROMPT_KEY = 'entity-panel';
-registerPrompt(PROMPT_KEY, 'Story Index — Entity Generation');
+const _DEFAULT_PROMPT =
+    'You are a story analyst. Extract named entities from the provided story entries and return a JSON array of category sections. ' +
+    'Each section has the shape: { "key": string, "title": string, "items": [{"name": string}] }. ' +
+    'Create sections for: Key Topics, Weapons/Items/Potions, Factions/Groups, and any other relevant categories you identify. ' +
+    'Do NOT include character names — those are extracted separately. ' +
+    'Return only valid JSON. No markdown fences, no commentary.';
+registerPrompt(PROMPT_KEY, 'Story Index — Entity Generation', _DEFAULT_PROMPT, { warnJson: true });
 
 const STOP_WORDS = new Set([
     'the','a','an','in','on','at','to','for','of','and','or','but','with',
@@ -255,18 +261,48 @@ function _itemHtml(item) {
 /** Strip non-letter chars from start/end of a word token. */
 const STRIP_RE = /^[^a-zA-Z]+|[^a-zA-Z']+$/g;
 
-/** Place-name keywords (lowercase) for `isPlace` heuristic. */
+/** Place-name keywords (lowercase) — if a name contains one of these it's not a being. */
 const PLACE_WORDS = new Set([
     'forest','city','village','town','castle','kingdom','mountain','river',
     'ocean','lake','road','street','temple','ruins','island','valley',
-    'cave','tower','palace',
+    'cave','tower','palace','district','realm','land','keep','fort',
+    'sea','bay','port','bridge','gate','pass','plains','desert',
 ]);
 
-function _isPlaceName(name) {
+/**
+ * Known non-being words: days, months, planets, common titles/concepts that
+ * get capitalised mid-sentence but are not character names.
+ */
+const NON_BEING_WORDS = new Set([
+    // days
+    'monday','tuesday','wednesday','thursday','friday','saturday','sunday',
+    // months
+    'january','february','march','april','may','june',
+    'july','august','september','october','november','december',
+    // planets / celestial
+    'earth','moon','sun','mars','venus','jupiter','saturn','mercury',
+    'uranus','neptune','pluto','sol',
+    // common non-being titles / concepts
+    'god','gods','goddess','king','queen','lord','lady','sir','dame',
+    'north','south','east','west','true','false',
+]);
+
+/**
+ * Return true if the name should be classified as a non-being (place, concept, etc.)
+ * based on keywords, known exclusions, or how often it follows "the" in text.
+ *
+ * @param {string} name - Candidate name.
+ * @param {number} theCount - Times it was preceded by "the" across all entries.
+ * @param {number} totalCount - Total occurrences across all entries.
+ */
+function _isNonBeing(name, theCount, totalCount) {
     const lower = name.toLowerCase();
+    if (NON_BEING_WORDS.has(lower)) return true;
     for (const pw of PLACE_WORDS) {
         if (lower.includes(pw)) return true;
     }
+    // If more than half of all occurrences follow "the", treat as non-being
+    if (totalCount > 0 && theCount / totalCount > 0.5) return true;
     return false;
 }
 
@@ -288,10 +324,10 @@ function _extendPhrase(words, startIdx) {
 }
 
 /**
- * Scan one entry's content and return a Set of candidate entity names.
+ * Scan one entry's content. Returns a Map of { phrase → { preceded by "the" count } }.
  */
 function _scanEntry(content) {
-    const found = new Set();
+    const found = new Map();
     const words = content.split(/\s+/);
 
     for (let i = 0; i < words.length; i++) {
@@ -299,31 +335,41 @@ function _scanEntry(content) {
         if (word.length < 2 || !/^[A-Z]/.test(word)) continue;
         if (STOP_WORDS.has(word.toLowerCase())) continue;
 
-        const prev = i > 0 ? words[i - 1] : '';
-        if (i === 0 || /[.!?]["']?$/.test(prev)) continue;
+        const prev = i > 0 ? words[i - 1].toLowerCase().replaceAll(STRIP_RE, '') : '';
+        if (i === 0 || /[.!?]["']?$/.test(words[i - 1])) continue;
 
         const { phrase, consumed } = _extendPhrase(words, i);
         i += consumed;
-        found.add(phrase);
+        const wasThe = prev === 'the';
+        const existing = found.get(phrase) ?? { the: 0, total: 0 };
+        found.set(phrase, { the: existing.the + (wasThe ? 1 : 0), total: existing.total + 1 });
     }
     return found;
 }
 
 function _extractEntities() {
+    // Map of name → { entryNums, theCount, totalCount }
     const entityMap = new Map();
 
     for (const [num, entry] of state.entries) {
         if (!entry.content) continue;
-        for (const name of _scanEntry(entry.content)) {
-            if (!entityMap.has(name)) entityMap.set(name, new Set());
-            entityMap.get(name).add(num);
+        for (const [name, { the: theC, total: totC }] of _scanEntry(entry.content)) {
+            if (!entityMap.has(name)) entityMap.set(name, { nums: new Set(), theCount: 0, totalCount: 0 });
+            const rec = entityMap.get(name);
+            rec.nums.add(num);
+            rec.theCount   += theC;
+            rec.totalCount += totC;
         }
     }
 
     return [...entityMap.entries()]
-        .filter(([, nums]) => nums.size >= 2)
-        .toSorted((a, b) => b[1].size - a[1].size)
-        .map(([name, nums]) => ({ name, count: nums.size, isPlace: _isPlaceName(name) }));
+        .filter(([, { nums }]) => nums.size >= 2)
+        .toSorted((a, b) => b[1].nums.size - a[1].nums.size)
+        .map(([name, { nums, theCount, totalCount }]) => ({
+            name,
+            count:   nums.size,
+            isPlace: _isNonBeing(name, theCount, totalCount),
+        }));
 }
 
 // ─── AI generation ────────────────────────────────────────────
@@ -340,12 +386,7 @@ function _buildEntryTexts() {
 
 /** Call ST API and return the raw text response. */
 async function _callGenerateApi(entryTexts) {
-    const sysPrompt = getPrompt(PROMPT_KEY) ||
-        'You are a story analyst. Extract named entities from the provided story entries and return a JSON array of sections. ' +
-        'Each section has: { "key": string, "title": string, "items": [{"name": string}] }. ' +
-        'Create sections for: Key Topics, Weapons/Items/Potions, Factions/Groups, and any other relevant categories you find. ' +
-        'Do NOT include character names (those are handled separately). ' +
-        'Return only valid JSON. No markdown fences.';
+    const sysPrompt = getPrompt(PROMPT_KEY);
 
     const ctx  = SillyTavern.getContext();
     const resp = await fetch('/api/backends/chat-completions/generate', {

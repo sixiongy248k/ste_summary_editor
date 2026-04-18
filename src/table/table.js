@@ -190,8 +190,9 @@ export function renderTable() {
     $('#se-th-feedback').toggle(hasFeedback);
     const colSpan = hasFeedback ? 9 : 8;
 
-    // Show empty state or table
-    if (entries.length === 0 && state.entries.size === 0) {
+    // Show empty state or table — keep table visible if supplementary files are assigned
+    const hasSupp = [...state.supplementaryFiles.values()].some(f => !!f.category);
+    if (entries.length === 0 && state.entries.size === 0 && !hasSupp) {
         $('#se-empty-state').show();
         $('#se-table').hide();
         $('#se-pagination').hide();
@@ -258,17 +259,18 @@ export function renderTable() {
 /**
  * Render supplementary file rows at the bottom of the table.
  * These appear when filterAct is 'all' or matches a supp:* category.
+ * Rows use the same column structure as regular entry rows.
  * @param {jQuery} $body
  * @param {number} colSpan
  */
 function _renderSupplementaryRows($body, colSpan) {
     const filterVal = state.filterAct;
     const isAll  = filterVal === 'all';
-    const isSupp = typeof filterVal === 'string' && filterVal.startsWith('supp:');
+    const isSuppFilter = typeof filterVal === 'string' && filterVal.startsWith('supp:');
 
-    if (!isAll && !isSupp) return;
+    if (!isAll && !isSuppFilter) return;
 
-    const filterCat = isSupp ? filterVal.slice(5) : null; // e.g. 'character-notes' or 'all'
+    const filterCat = isSuppFilter ? filterVal.slice(5) : null;
 
     const suppList = [...state.supplementaryFiles.values()].filter(f => {
         if (!f.category) return false;
@@ -278,37 +280,151 @@ function _renderSupplementaryRows($body, colSpan) {
 
     if (suppList.length === 0) return;
 
-    // Separator row
+    // When filtered to supp-only, clear the "no entries match" placeholder
+    if (isSuppFilter) $body.find('tr').remove();
+
     $body.append(
         `<tr class="se-supp-separator"><td colspan="${colSpan}">` +
         `<span class="se-supp-separator-label">&#128196; Supplementary Files</span></td></tr>`
     );
 
+    const hasFeedback = colSpan === 9;
     for (const supp of suppList) {
-        const content = supp.editedContent || supp.content;
-        const preview = escHtml(content.slice(0, 120)) + (content.length > 120 ? '…' : '');
-        const catLabel = escHtml(_suppCategoryLabel(supp.category));
-        const isEdited = supp.editedContent && supp.editedContent !== supp.content;
-
-        $body.append(
-            `<tr class="se-supp-row" data-supp-file="${escAttr(supp.name)}">` +
-            `<td></td>` +
-            `<td class="se-supp-icon-cell">&#128196;</td>` +
-            `<td><span class="se-supp-cat-badge se-supp-cat-${escAttr(supp.category)}">${catLabel}</span></td>` +
-            `<td colspan="${colSpan - 4}" class="se-supp-content-cell">` +
-            `<span class="se-supp-filename">${escHtml(supp.name)}</span>` +
-            (isEdited ? '<span class="se-supp-edited-badge">Modified</span>' : '') +
-            `<span class="se-supp-preview">${preview}</span>` +
-            `</td>` +
-            `<td><button class="se-btn se-btn-sm se-supp-edit-btn" data-supp-file="${escAttr(supp.name)}">Edit</button></td>` +
-            `</tr>`
-        );
+        $body.append(_buildSuppRow(supp, hasFeedback));
     }
 
-    // Bind edit buttons
-    $body.find('.se-supp-edit-btn').on('click', function (e) {
+    $body.find('.se-supp-content-cell').on('click', function (e) {
         e.stopPropagation();
-        openSuppEditor($(this).data('supp-file'));
+        openSuppEditor($(this).data('suppFile'));
+    });
+
+    _bindSuppEditableCells($body);
+}
+
+/** Build a single supplementary file row using the same column layout as entry rows. */
+function _buildSuppRow(supp, hasFeedback) {
+    const content  = supp.editedContent || supp.content || '';
+    const preview  = content.slice(0, 200);
+    const trimmed  = content.length > 200;
+    const catLabel = _suppCategoryLabel(supp.category);
+    const isEdited = supp.editedContent && supp.editedContent !== supp.content;
+    const modCls   = isEdited ? ' se-content-modified' : '';
+
+    const date     = supp.date     || '';
+    const time     = supp.time     || '';
+    const location = supp.location || '';
+    const notes    = supp.notes    || '';
+
+    return `
+    <tr class="se-supp-row" data-supp-file="${escAttr(supp.name)}">
+        <td class="se-col-check"><input type="checkbox" disabled /></td>
+        <td class="se-col-num se-supp-num" title="${escAttr(supp.name)}">&#128196;</td>
+        <td class="se-col-act">
+            <span class="se-supp-cat-badge">${escHtml(catLabel)}</span>
+        </td>
+        <td class="se-col-content se-supp-content-cell${modCls}" data-supp-file="${escAttr(supp.name)}" title="Click to edit">
+            <span class="se-content-text">${escHtml(preview)}${trimmed ? '…' : ''}</span>
+        </td>
+        <td class="se-editable-cell se-supp-editable" data-supp-file="${escAttr(supp.name)}" data-field="date">
+            <span class="se-cell-display ${date ? '' : 'se-cell-empty'}">${escHtml(date) || 'Date'}</span>
+        </td>
+        <td class="se-editable-cell se-supp-editable" data-supp-file="${escAttr(supp.name)}" data-field="time">
+            <span class="se-cell-display ${time ? '' : 'se-cell-empty'}">${escHtml(time) || 'Time'}</span>
+        </td>
+        <td class="se-editable-cell se-supp-editable" data-supp-file="${escAttr(supp.name)}" data-field="location">
+            <span class="se-cell-display ${location ? '' : 'se-cell-empty'}">${escHtml(location) || 'Location'}</span>
+        </td>
+        <td class="se-editable-cell se-supp-editable" data-supp-file="${escAttr(supp.name)}" data-field="notes">
+            <span class="se-cell-display ${notes ? '' : 'se-cell-empty'}" title="Author notes only">${escHtml(notes) || 'Notes'}</span>
+        </td>
+        ${hasFeedback ? '<td></td>' : ''}
+    </tr>`;
+}
+
+/**
+ * Bind editable cell popovers for supplementary file rows.
+ * Reads/writes date, time, location, notes on the supp record.
+ */
+function _bindSuppEditableCells($body) {
+    $body.find('.se-supp-editable .se-cell-display').on('click', function (e) {
+        e.stopPropagation();
+        closeEditPopover();
+
+        const $td      = $(this).closest('.se-supp-editable');
+        const fileName = $td.data('suppFile');
+        const field    = $td.data('field');
+        const supp     = state.supplementaryFiles.get(fileName);
+        if (!supp) return;
+
+        const currentValue = supp[field] || '';
+        const label  = field.charAt(0).toUpperCase() + field.slice(1);
+        const isDate = field === 'date';
+        const isTime = field === 'time';
+        const isNotes = field === 'notes';
+
+        let fieldInput;
+        if (isDate)       fieldInput = buildDatePickerHtml(currentValue);
+        else if (isTime)  fieldInput = buildTimePickerHtml(currentValue);
+        else if (isNotes) fieldInput = `<textarea placeholder="${label}" rows="4">${escHtml(currentValue)}</textarea>`;
+        else              fieldInput = `<input type="text" value="${escAttr(currentValue)}" placeholder="${label}" />`;
+
+        const showOk = !isDate;
+        const pop = document.createElement('div');
+        pop.className = 'se-edit-popover' + (isDate ? ' se-edit-popover-wide' : '') + (isNotes ? ' se-edit-popover-notes' : '');
+        pop.innerHTML =
+            `<div class="se-edit-popover-label">${label} <span style="color:#75715e;font-size:0.85em;">(no export effect)</span></div>` +
+            fieldInput +
+            '<div class="se-edit-popover-actions">' +
+            (isDate ? '<button class="se-btn se-btn-sm se-ep-clear">Clear</button><span style="flex:1;"></span>' : '') +
+            '<button class="se-btn se-btn-sm se-ep-cancel">Cancel</button>' +
+            (showOk ? '<button class="se-btn se-btn-primary se-btn-sm se-ep-ok">OK</button>' : '') +
+            '</div>';
+
+        const rect = $td[0].getBoundingClientRect();
+        const popWidth = isDate ? 260 : 240;
+        let left = rect.left;
+        let top  = rect.bottom + 6;
+        if (left + popWidth > window.innerWidth) left = window.innerWidth - popWidth - 10;
+        if (left < 4) left = 4;
+        pop.style.left = left + 'px';
+        pop.style.top  = top + 'px';
+        document.body.appendChild(pop);
+        activeEditPopover = pop;
+
+        const $display = $(this);
+        const doSave = (overrideVal) => {
+            let newVal;
+            if (typeof overrideVal === 'string') newVal = overrideVal;
+            else if (isTime) newVal = readTimePicker(pop);
+            else {
+                const input = pop.querySelector('input, textarea');
+                newVal = input ? input.value.trim() : '';
+            }
+            supp[field] = newVal;
+            $display.text(newVal || label);
+            $display.toggleClass('se-cell-empty', !newVal);
+            closeEditPopover();
+            persistState();
+        };
+
+        if (isDate) {
+            bindDatePickerEvents(pop, doSave);
+            $(pop).find('.se-ep-clear').on('click', () => doSave(''));
+        } else if (isTime) {
+            bindTimePickerEvents(pop);
+        } else {
+            const input = pop.querySelector('input, textarea');
+            input.focus();
+            if (input.select) input.select();
+        }
+        $(pop).find('.se-ep-ok').on('click', () => doSave());
+        $(pop).find('.se-ep-cancel').on('click', () => closeEditPopover());
+        if (!isDate) {
+            $(pop).on('keydown', (ev) => {
+                if (ev.key === 'Enter') { ev.preventDefault(); doSave(); }
+                if (ev.key === 'Escape') { ev.preventDefault(); closeEditPopover(); }
+            });
+        }
     });
 }
 
