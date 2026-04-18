@@ -120,6 +120,8 @@ export function getFilteredEntries() {
     } else if (typeof state.filterAct === 'string' && state.filterAct.startsWith('supp:')) {
         // Supplementary filter: hide all main entries — supp rows render separately below
         entries = [];
+    } else if (state.filterAct === 'summary:all') {
+        // Summary-only filter: show all regular entries, hide supp rows (no-op here — supp skipped below)
     } else if (state.filterAct !== 'all') {
         const actId = Number.parseInt(state.filterAct, 10);
         entries = entries.filter(e => e.isGap || e.actId === actId);
@@ -269,8 +271,21 @@ function _renderSupplementaryRows($body, colSpan, isLastPage = true, showSummary
     const filterVal = state.filterAct;
     const isAll  = filterVal === 'all';
     const isSuppFilter = typeof filterVal === 'string' && filterVal.startsWith('supp:');
+    // summary:all shows only entry rows — no supp section (but still allow summary header)
+    const isSummaryFilter = filterVal === 'summary:all';
 
-    if (!isAll && !isSuppFilter) return;
+    if (!isAll && !isSuppFilter && !isSummaryFilter) return;
+
+    // Summary-only filter: prepend header on first page if applicable, then skip supp rows
+    if (isSummaryFilter) {
+        if (showSummaryHeader) {
+            $body.prepend(
+                `<tr class="se-supp-separator se-summary-header"><td colspan="${colSpan}">` +
+                `<span class="se-supp-separator-label">&#128221; Summary Files</span></td></tr>`
+            );
+        }
+        return;
+    }
 
     const filterCat = isSuppFilter ? filterVal.slice(5) : null;
 
