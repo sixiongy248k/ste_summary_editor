@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.1.0...v1.1.1) (2026-04-19)
+
+
+### Bug Fixes
+
+* story index search, ingested files count pill, unassigned act map styling ([12f2c8e](https://github.com/Alphonsos88k/ste_summary_editor/commit/12f2c8ebe5aa1f3c976cf0eba7690834a2b08bb1)), closes [#555](https://github.com/Alphonsos88k/ste_summary_editor/issues/555)
+
 # [1.1.0](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.0.1...v1.1.0) (2026-04-18)
 
 
