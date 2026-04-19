@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.1.0...v1.2.0) (2026-04-19)
+
+
+### Bug Fixes
+
+* act assignment entryNums sync, no auto-delete, Unassign All + Clear Acts buttons ([f1e1434](https://github.com/Alphonsos88k/ste_summary_editor/commit/f1e1434eb63e8e88d5b9d4bed93373c5dcda076d))
+* replace remaining native browser dialogs in index.js ([4a79ee6](https://github.com/Alphonsos88k/ste_summary_editor/commit/4a79ee63a52486fbba6214f2253d15cb3988722d))
+* story index search, ingested files count pill, unassigned act map styling ([12f2c8e](https://github.com/Alphonsos88k/ste_summary_editor/commit/12f2c8ebe5aa1f3c976cf0eba7690834a2b08bb1)), closes [#555](https://github.com/Alphonsos88k/ste_summary_editor/issues/555)
+
+
+### Features
+
+* replace all native browser dialogs with styled panel replacements ([fefa2ad](https://github.com/Alphonsos88k/ste_summary_editor/commit/fefa2ad730f51b9211b9c54f0d5637d45a2b6057))
+
 ## [1.1.1](https://github.com/Alphonsos88k/ste_summary_editor/compare/v1.1.0...v1.1.1) (2026-04-19)
 
 
