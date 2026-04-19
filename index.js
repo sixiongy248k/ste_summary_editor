@@ -818,7 +818,7 @@ function bindReviewEvents() {
     $('#se-btn-utils').on('click', openUtilsPanel);
 
     setEntityFilterCallback((term) => {
-        state.searchQuery = term;
+        state.searchQuery = term.toLowerCase();
         $('#se-search').val(term);
         renderTable();
     });
@@ -1850,6 +1850,15 @@ function renderIngestSummary() {
 
     // Keep files assignment panel in sync
     refreshFilesPanel();
+
+    // File count pill in drawer header
+    const totalFiles = state.files.length;
+    const $count = $('#se-file-drawer-count');
+    if (totalFiles > 0) {
+        $count.text(totalFiles).show();
+    } else {
+        $count.text('').hide();
+    }
 
     if (state.entries.size > 0) {
         const validFiles = state.files.filter(f => f.valid).length;

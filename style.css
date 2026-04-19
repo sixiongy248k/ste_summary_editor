@@ -766,6 +766,23 @@
     color: var(--se-green);
     white-space: nowrap;
     transition: color 0.12s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.se-file-drawer-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: rgba(166,226,46,0.18);
+    color: var(--se-green);
+    font-size: 0.78em;
+    font-weight: 700;
+    line-height: 1;
 }
 
 /* File list inside drawer — scrollable */
@@ -2864,8 +2881,10 @@ tr.se-drag-over {
 }
 
 .se-minimap-cell.se-unassigned {
-    background: #555;
-    color: #ccc;
+    background: transparent;
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.45);
+    box-shadow: none;
 }
 
 .se-minimap-legend {
