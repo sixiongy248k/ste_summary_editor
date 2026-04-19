@@ -1,0 +1,19 @@
+<div class="se-tl-header">
+    <span class="se-tl-title">&#128197; Timeline Analysis</span>
+    <button class="se-close-circle se-tl-close">&times;</button>
+</div>
+<div class="se-tl-controls">
+    <div class="se-tl-files">{{fileList}}</div>
+    <div class="se-tl-level-wrap">
+        <span class="se-tl-level-label">Strictness:</span>
+        {{levelButtons}}
+        <button class="se-btn se-btn-sm se-prompt-edit-btn" data-edit-prompt="{{promptKey}}" title="Edit analysis prompt" style="margin-left:6px;">&#9881;</button>
+    </div>
+    <div class="se-tl-action-row">
+        <button class="se-btn se-btn-primary se-btn-sm" id="se-tl-run">&#9654; Run Analysis</button>
+        <span id="se-tl-status" class="se-tl-status"></span>
+    </div>
+</div>
+<div class="se-tl-results" id="se-tl-results">
+    <div class="se-tl-empty">Click Run Analysis to begin.</div>
+</div>

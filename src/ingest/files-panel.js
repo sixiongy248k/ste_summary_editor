@@ -14,6 +14,8 @@
 import { state } from '../core/state.js';
 import { toggleTimelineFile } from '../analysis/timeline-analysis.js';
 import { escHtml, escAttr, makeDraggable, spawnPanel, registerPanel } from '../core/utils.js';
+import { TEMPLATES } from '../core/constants.js';
+import { loadTemplate } from '../core/template-loader.js';
 
 /** Supplementary categories available for non-summary files. */
 export const SUPP_CATEGORIES = [
@@ -32,16 +34,17 @@ let _panel = null;
 /**
  * Open the files assignment panel (or refresh if already open).
  */
-export function openFilesPanel() {
+export async function openFilesPanel() {
     if (_panel) { _renderRows(); return; }
 
     const overlay = document.getElementById('se-modal-overlay');
     if (!overlay) return;
 
+    const tmpl = await loadTemplate(TEMPLATES.FILES_PANEL);
     _panel = document.createElement('div');
     _panel.id = 'se-files-panel';
     _panel.className = 'se-files-panel';
-    _panel.innerHTML = _buildHtml();
+    _panel.innerHTML = tmpl;
     overlay.appendChild(_panel);
 
     // Position to the right of the file drawer, or centred if drawer is closed
@@ -86,15 +89,6 @@ export function refreshFilesPanel() {
 
 // ─── Private helpers ─────────────────────────────────────────
 
-function _buildHtml() {
-    return `
-        <div class="se-fp-header">
-            <span class="se-fp-title">&#128194; Ingested Files</span>
-            <button class="se-close-circle se-fp-close">&times;</button>
-        </div>
-        <div class="se-fp-section-label">Assignment Mode</div>
-        <div class="se-fp-body" id="se-fp-body"></div>`;
-}
 
 function _bindEvents() {
     _panel.querySelector('.se-fp-close').addEventListener('click', closeFilesPanel);
