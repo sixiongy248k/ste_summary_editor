@@ -71,6 +71,7 @@ registerPrompt('gap-suggest', 'Gap Suggest');
 // ─── Tailwind CDN & Libraries ───
 import { configureTailwind } from './lib/tailwind-config.js';
 import { closeColorPicker, isColorPickerOpen } from './src/arcs/color-picker.js';
+import { seAlert, seConfirm } from './src/core/dialogs.js';
 
 // ─────────────────────────────────────────────
 //  Panel template cache (populated during init)
@@ -257,9 +258,9 @@ jQuery(async () => {
     bindModalEvents();
     bindKeyboardShortcuts(closeEditor, {
         openContentEditor: (num) => openContentEditor(num),
-        deleteEntry: (num) => {
+        deleteEntry: async (num) => {
             if (!state.entries.has(num)) return;
-            if (!confirm(`Delete entry #${num}?`)) return;
+            if (!await seConfirm(`Delete entry #${num}?`, { danger: true })) return;
             snapshotState();
             state.entries.delete(num);
             state.selected.delete(num);
@@ -678,9 +679,9 @@ function resetEditorState() {
 /**
  * Clear all state and UI (with confirmation). Undoable.
  */
-function handleClearAll() {
+async function handleClearAll() {
     if (state.entries.size === 0) return;
-    if (!confirm('Clear all entries, acts, and metadata?')) return;
+    if (!await seConfirm('Clear all entries, acts, and metadata?', { danger: true })) return;
 
     const snap = snapshotState();
     const entryCount = state.entries.size;
@@ -912,7 +913,7 @@ function handleBulkActAssign() {
  *
  * @param {number} actId - Target act ID.
  */
-function reassignSelectedEntriesToAct(actId) {
+async function reassignSelectedEntriesToAct(actId) {
     const nums = [...state.selected];
     if (nums.length === 0) return;
     const snap = snapshotState();
@@ -928,7 +929,7 @@ function reassignSelectedEntriesToAct(actId) {
             const a = state.acts.get(e.actId);
             return a ? a.name : `Act #${e.actId}`;
         }))];
-        const ok = confirm(
+        const ok = await seConfirm(
             `${alreadyAssigned.length} selected entr${alreadyAssigned.length === 1 ? 'y is' : 'ies are'} already assigned to: ${actNames.join(', ')}.\n\nReassign to the new act?`
         );
         if (!ok) return;
@@ -1164,8 +1165,8 @@ function bindCausalPanelEvents() {
     });
 
     // Clear all
-    $(document).on('click', '#se-causal-clear-all', () => {
-        if (!confirm('Remove all causal links?')) return;
+    $(document).on('click', '#se-causal-clear-all', async () => {
+        if (!await seConfirm('Remove all causal links?', { danger: true })) return;
         const snapCausal = structuredClone(state.causality);
         clearAllLinks();
         pushUndo('Clear all causal links', () => {
@@ -1191,11 +1192,11 @@ function bindCausalPanelEvents() {
  * Keeps the lowest entry number, assigns earliest act (or null).
  * Deleted entries are removed from state — no renumbering.
  */
-function doSimpleMerge() {
+async function doSimpleMerge() {
     const nums = [...state.selected].sort((a, b) => a - b);
     if (nums.length < 2) return;
 
-    const confirmed = confirm(
+    const confirmed = await seConfirm(
         `Merge ${nums.length} selected entries (#${nums[0]}–#${nums.at(-1)}) into entry #${nums[0]}?`
     );
     if (!confirmed) return;
@@ -1255,15 +1256,16 @@ function doSimpleMerge() {
  * @param {number} from
  * @param {number} to
  */
-function doMergeRange(from, to) {
+async function doMergeRange(from, to) {
     const lo = Math.min(from, to);
     const hi = Math.max(from, to);
     const toMerge = collectMergeEntries(lo, hi);
     if (toMerge.length < 2) return;
 
-    const confirmed = confirm(
+    const confirmed = await seConfirm(
         `Merge entries #${lo}–#${hi} (${toMerge.length} entries) into one?\n\n` +
-        `⚠ This is irreversible — merged rows will be permanently removed.`
+        `⚠ This is irreversible — merged rows will be permanently removed.`,
+        { danger: true }
     );
     if (!confirmed) return;
 
@@ -1741,7 +1743,7 @@ async function openGapSuggest(num) {
     const nearby = sorted.filter(e => Math.abs(e.num - num) <= 5);
 
     if (nearby.length === 0) {
-        alert('No surrounding entries found — add some entries first.');
+        await seAlert('No surrounding entries found — add some entries first.');
         return;
     }
 
