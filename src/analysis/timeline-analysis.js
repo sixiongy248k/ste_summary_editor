@@ -14,6 +14,8 @@
 import { state, persistState } from '../core/state.js';
 import { registerPrompt, getPrompt } from '../core/system-prompts.js';
 import { escHtml, spawnPanel } from '../core/utils.js';
+import { TEMPLATES } from '../core/constants.js';
+import { loadTemplate, fillTemplate } from '../core/template-loader.js';
 
 const PROMPT_KEY = 'timeline-analysis';
 
@@ -71,16 +73,27 @@ export function hasTimelineFiles() {
  * Open (or re-open) the timeline results panel.
  * If results already exist, shows them immediately. Otherwise shows empty state.
  */
-export function openTimelinePanel() {
+export async function openTimelinePanel() {
     if (_panel) { _panel.remove(); _panel = null; }
 
     const overlay = document.getElementById('se-modal-overlay');
     if (!overlay) return;
 
+    const tmpl   = await loadTemplate(TEMPLATES.TIMELINE_ANALYSIS_PANEL);
+    const files  = [...state.timelineFiles].filter(n => state.files.some(f => f.name === n && f.valid));
+    const fileList = files.length
+        ? files.map(n => `<span class="se-tl-file-pill">${escHtml(n)}</span>`).join('')
+        : '<span class="se-tl-no-files">No timeline files marked</span>';
+    const levelButtons = ['relaxed', 'medium', 'thorough'].map(l => {
+        const active = l === _currentLevel ? ' active' : '';
+        const label  = l.charAt(0).toUpperCase() + l.slice(1);
+        return `<button class="se-tl-level-btn${active}" data-level="${l}">${label}</button>`;
+    }).join('');
+
     _panel = document.createElement('div');
     _panel.id = 'se-timeline-panel';
     _panel.className = 'se-timeline-panel';
-    _panel.innerHTML = _buildPanelHtml();
+    _panel.innerHTML = fillTemplate(tmpl, { fileList, levelButtons, promptKey: PROMPT_KEY });
     overlay.appendChild(_panel);
 
     spawnPanel(_panel, overlay, '.se-tl-header', 540, 480);
@@ -158,32 +171,6 @@ export async function runTimelineAnalysis(_fromPanel = false) {
 
 // ─── Private helpers ─────────────────────────────────────────
 
-function _buildPanelHtml() {
-    const files = [...state.timelineFiles].filter(n => state.files.some(f => f.name === n && f.valid));
-    const fileList = files.map(n => `<span class="se-tl-file-pill">${escHtml(n)}</span>`).join('');
-    return `
-        <div class="se-tl-header">
-            <span class="se-tl-title">&#128197; Timeline Analysis</span>
-            <button class="se-close-circle se-tl-close">&times;</button>
-        </div>
-        <div class="se-tl-controls">
-            <div class="se-tl-files">${fileList || '<span class="se-tl-no-files">No timeline files marked</span>'}</div>
-            <div class="se-tl-level-wrap">
-                <span class="se-tl-level-label">Strictness:</span>
-                ${['relaxed','medium','thorough'].map(l =>
-                    `<button class="se-tl-level-btn${l === _currentLevel ? ' active' : ''}" data-level="${l}">${l.charAt(0).toUpperCase() + l.slice(1)}</button>`
-                ).join('')}
-                <button class="se-btn se-btn-sm se-prompt-edit-btn" data-edit-prompt="${PROMPT_KEY}" title="Edit analysis prompt" style="margin-left:6px;">&#9881;</button>
-            </div>
-            <div class="se-tl-action-row">
-                <button class="se-btn se-btn-primary se-btn-sm" id="se-tl-run">&#9654; Run Analysis</button>
-                <span id="se-tl-status" class="se-tl-status"></span>
-            </div>
-        </div>
-        <div class="se-tl-results" id="se-tl-results">
-            <div class="se-tl-empty">Click Run Analysis to begin.</div>
-        </div>`;
-}
 
 function _bindPanelEvents() {
     _panel.querySelector('.se-tl-close').addEventListener('click', closeTimelinePanel);

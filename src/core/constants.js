@@ -153,4 +153,10 @@ export const TEMPLATES = Object.freeze({
     GAP_SUGGEST_PANEL:       'partials/gap-suggest-panel',
     NEW_ENTRY_PROMPT:        'partials/new-entry-prompt',
     FILE_ITEM:               'partials/file-item',
+    EDIT_PROMPT_POPUP:       'partials/edit-prompt-popup',
+    SYSTEM_PROMPT_HUB:       'partials/system-prompt-hub',
+    SPH_CARD:                'partials/sph-card',
+    TIMELINE_ANALYSIS_PANEL: 'partials/timeline-analysis-panel',
+    FILES_PANEL:             'partials/files-panel',
+    TIMELINE_EDITOR_PANEL:   'partials/timeline-editor-panel',
 });

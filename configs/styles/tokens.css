@@ -1,0 +1,577 @@
+/* ============================================================
+   Summary Editor — Extension Styles
+   Monokai/dark palette, tabbed workflow layout
+   Ported from mockup.css with se- prefixes for ST isolation
+   ============================================================ */
+
+/* ── Design Tokens ──────────────────────────────────────────── */
+:root {
+    /* Background tiers */
+    --se-bg:        #272822;   /* base background */
+    --se-bg-dark:   #1e1f1a;   /* darker surface (panels, headers) */
+    --se-bg-mid:    #2c2d27;   /* mid surface (toolbars, footers) */
+    --se-bg-deep:   #1a1b17;   /* deepest (color picker) */
+
+    /* Borders */
+    --se-border:    #3e3d32;   /* default border */
+
+    /* Text */
+    --se-text:      #f8f8f2;   /* primary text */
+    --se-muted:     #75715e;   /* muted / secondary text */
+    --se-subtle:    #c8c8b4;   /* subtle body text */
+
+    /* Accent palette — Monokai */
+    --se-green:     #a6e22e;
+    --se-cyan:      #66d9e8;
+    --se-pink:      #f92672;
+    --se-orange:    #fd971f;
+    --se-purple:    #ae81ff;
+    --se-yellow:    #e6db74;
+}
+
+/* ---------- Settings drawer ---------- */
+#summary-editor-settings .se-settings-desc {
+    font-size: 0.9em;
+    color: var(--SmartThemeBodyColor, #ccc);
+    margin-bottom: 10px;
+}
+
+#summary-editor-settings .se-settings-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* ---------- Blacklist settings ---------- */
+.se-bl-section { margin-top: 12px; }
+.se-bl-label { display: block; font-weight: 600; font-size: 0.9em; color: var(--SmartThemeBodyColor, #ccc); margin-bottom: 2px; }
+.se-bl-hint { display: block; font-size: 0.78em; color: var(--SmartThemeQuoteColor, #888); margin-bottom: 6px; }
+
+.se-bl-input-wrap { position: relative; }
+.se-bl-input-wrap .text_pole { width: 100%; font-size: 0.88em; }
+
+.se-bl-dropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: 180px;
+    overflow-y: auto;
+    background: var(--SmartThemeBlurTintColor, #1e1e1e);
+    border: 1px solid var(--SmartThemeBorderColor, #444);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    z-index: 1000;
+}
+
+.se-bl-option {
+    padding: 6px 10px;
+    font-size: 0.85em;
+    color: var(--SmartThemeBodyColor, #ccc);
+    cursor: pointer;
+}
+.se-bl-option:hover { background: rgba(255,255,255,0.1); }
+
+.se-bl-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    min-height: 8px;
+}
+
+.se-bl-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    background: var(--SmartThemeBlurTintColor, #333);
+    color: var(--SmartThemeBodyColor, #ccc);
+    border: 1px solid var(--SmartThemeBorderColor, #555);
+}
+
+.se-bl-pill-x {
+    cursor: pointer;
+    font-weight: bold;
+    opacity: 0.6;
+    font-size: 1.1em;
+    line-height: 1;
+    margin-left: 2px;
+}
+.se-bl-pill-x:hover { opacity: 1; color: #f92672; }
+
+/* ---------- Modal overlay ---------- */
+#se-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+#se-modal-overlay.active {
+    display: flex;
+}
+
+/* ---------- Main container ---------- */
+#se-container {
+    background: var(--se-bg);
+    color: var(--se-text);
+    border: 1px solid var(--se-border);
+    border-radius: 8px;
+    width: 95vw;
+    max-width: 1400px;
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: 'Source Code Pro', 'Fira Code', 'Consolas', monospace;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+    position: relative;
+}
+
+/* ---------- Header bar ---------- */
+#se-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    padding-right: 170px;
+    background: var(--se-bg-dark);
+    border-bottom: 1px solid var(--se-border);
+    flex-shrink: 0;
+    position: relative;
+}
+
+#se-header h2 {
+    margin: 0;
+    font-size: 1.1em;
+    font-weight: 600;
+    color: var(--se-green);
+    letter-spacing: 0.5px;
+}
+
+#se-header .se-header-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: -12px 0;
+    padding: 0;
+    align-self: stretch;
+}
+
+/* Header divider — thin vertical line stretching full header height */
+.se-header-divider {
+    width: 1px;
+    align-self: stretch;
+    background: var(--se-border);
+    flex-shrink: 0;
+}
+
+/* Header Clear All button — flush next to close, no rounded corners */
+#se-btn-clear-all-header {
+    position: absolute;
+    top: 0;
+    right: 56px;
+    bottom: 0;
+    box-sizing: border-box;
+    border: none;
+    border-left: 1px solid var(--se-border);
+    border-right: 1px solid var(--se-border);
+    border-radius: 0;
+    margin: 0;
+    padding: 0 24px;
+    font-family: inherit;
+    font-size: 0.78em;
+    background: rgba(253, 151, 31, 0.06);
+    color: var(--se-orange);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+#se-btn-clear-all-header:hover {
+    background: #fd971f;
+    color: var(--se-bg);
+}
+#se-btn-clear-all-header:active {
+    background: #e0850a;
+    color: var(--se-bg-dark);
+}
+
+/* Header close button — fills the top-right corner of the container */
+.se-header-close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 56px;
+    box-sizing: border-box;
+    border: none;
+    border-radius: 0 8px 0 0;
+    margin: 0;
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--se-muted);
+    font-size: 1.3em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+.se-header-close:hover {
+    background: var(--se-pink);
+    color: #fff;
+}
+.se-header-close:active {
+    background: #d81e60;
+    color: #fff;
+}
+
+/* Undo box — shows what action can be reverted */
+.se-undo-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(253, 151, 31, 0.08);
+    border: 1px solid rgba(253, 151, 31, 0.25);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.8em;
+}
+
+.se-undo-label {
+    color: var(--se-orange);
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.se-undo-desc {
+    color: #c8c8b4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 250px;
+}
+
+/* ---------- Footer Navigation ---------- */
+.se-footer-nav {
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid var(--se-border);
+    background: var(--se-bg-mid);
+    flex-shrink: 0;
+    padding: 0;
+    min-height: 38px;
+}
+.se-footer-spacer {
+    flex: 1;
+}
+/* Back button — fills bottom-left corner, light blue tint */
+.se-footer-nav .se-footer-back {
+    border: none;
+    border-right: 1px solid var(--se-border);
+    border-radius: 0 0 0 8px;
+    padding: 0 44px;
+    font-size: 0.85em;
+    background: rgba(102, 165, 210, 0.1);
+    color: #7ab0d4;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.se-footer-nav .se-footer-back:hover {
+    background: #7ab0d4;
+    color: var(--se-bg-mid);
+}
+.se-footer-nav .se-footer-back:active {
+    background: #5a96be;
+    color: var(--se-bg-dark);
+}
+/* Next button — fills bottom-right corner, green accent */
+.se-footer-nav .se-footer-next {
+    border: none;
+    border-left: 1px solid var(--se-border);
+    border-radius: 0 0 8px 0;
+    padding: 0 44px;
+    font-size: 0.85em;
+    font-weight: 600;
+    background: rgba(166, 226, 46, 0.08);
+    color: var(--se-green);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.se-footer-nav .se-footer-next:hover {
+    background: var(--se-green);
+    color: var(--se-bg-mid);
+}
+.se-footer-nav .se-footer-next:active {
+    background: #8bc424;
+    color: var(--se-bg-dark);
+}
+
+/* ---------- Buttons ---------- */
+.se-btn {
+    background: var(--se-border);
+    color: var(--se-text);
+    border: 1px solid #555;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 0.85em;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.se-btn:hover {
+    background: #4a493e;
+    border-color: #777;
+}
+
+.se-btn-primary {
+    background: var(--se-green);
+    color: var(--se-bg);
+    border-color: var(--se-green);
+    font-weight: 600;
+}
+
+.se-btn-primary:hover {
+    background: #b8f040;
+}
+
+.se-btn-danger {
+    background: var(--se-pink);
+    color: #fff;
+    border-color: var(--se-pink);
+}
+
+.se-btn-danger:hover {
+    background: #ff3d83;
+}
+
+.se-btn-cyan {
+    background: transparent;
+    color: var(--se-cyan);
+    border-color: var(--se-cyan);
+}
+
+.se-btn-cyan:hover {
+    background: rgba(102, 217, 232, 0.1);
+}
+
+.se-btn-destructive {
+    background: transparent;
+    color: #f92672;
+    border-color: #f92672;
+}
+
+.se-btn-destructive:hover {
+    background: rgba(249, 38, 114, 0.12);
+}
+
+.se-btn-warn {
+    color: var(--se-orange);
+    border-color: rgba(253, 151, 31, 0.3);
+    font-size: 0.78em;
+}
+
+.se-btn-warn:hover {
+    background: rgba(253, 151, 31, 0.1);
+    border-color: var(--se-orange);
+}
+
+.se-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ⓘ info tooltip — left-aligned inside action buttons (matches .se-info-icon style) */
+.se-btn-info {
+    display: inline-block;
+    cursor: help;
+    color: rgba(102, 217, 232, 0.65);
+    font-size: 1.1em;
+    vertical-align: middle;
+    margin-right: 5px;
+    flex-shrink: 0;
+    transition: color 0.15s;
+    user-select: none;
+}
+
+.se-btn-info:hover {
+    color: var(--se-cyan);
+}
+
+/* On the green Download Export button, use dark ink */
+#se-btn-do-export .se-btn-info {
+    color: rgba(0, 0, 0, 0.35);
+}
+
+#se-btn-do-export .se-btn-info:hover {
+    color: rgba(0, 0, 0, 0.65);
+}
+
+.se-btn-info-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    width: 240px;
+    white-space: normal;
+    word-break: normal;
+    background: var(--se-bg-dark);
+    border: 1px solid var(--se-border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    text-align: left;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    pointer-events: none;
+    font-weight: normal;
+}
+
+.se-btn-info-tip-title {
+    color: var(--se-green);
+    font-size: 0.78em;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+}
+
+.se-btn-info-tip-body {
+    font-size: 0.8em;
+    color: var(--se-subtle);
+    line-height: 1.5;
+}
+
+.se-btn-info:hover .se-btn-info-tip {
+    display: block;
+}
+
+/* Download Export butts flush against format group buttons */
+.se-btn-dl-export {
+    border-radius: 4px 0 0 4px;
+}
+
+.se-btn-sm {
+    padding: 3px 8px;
+    font-size: 0.78em;
+}
+.se-review-toolbar .se-btn-sm {
+    height: 30px;
+    box-sizing: border-box;
+    line-height: 1;
+}
+
+/* ---------- Workflow Tabs ---------- */
+.se-tab-bar {
+    display: flex;
+    gap: 0;
+    background: var(--se-bg-dark);
+    border-bottom: 2px solid var(--se-border);
+    flex-shrink: 0;
+    padding: 0;
+}
+
+.se-tab {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px 10px;
+    font-size: 0.85em;
+    font-weight: 600;
+    color: var(--se-muted);
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s;
+    user-select: none;
+    position: relative;
+    gap: 8px;
+}
+
+.se-tab:hover {
+    color: var(--se-text);
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.se-tab.active {
+    color: var(--se-green);
+    border-bottom-color: var(--se-green);
+}
+
+.se-tab.done {
+    color: var(--se-cyan);
+    border-bottom-color: var(--se-cyan);
+}
+
+.se-tab .se-tab-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--se-border);
+    color: var(--se-muted);
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.se-tab.active .se-tab-num {
+    background: var(--se-green);
+    color: var(--se-bg);
+}
+
+.se-tab.done .se-tab-num {
+    background: var(--se-cyan);
+    color: var(--se-bg);
+}
+
+/* Tab badge — far right edge */
+.se-tab-badge {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--se-border);
+    color: var(--se-muted);
+    font-size: 0.7em;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 8px;
+    min-width: 20px;
+    text-align: center;
+}
+
+.se-tab-badge:empty {
+    display: none;
+}
+
+.se-tab.active .se-tab-badge {
+    background: rgba(166, 226, 46, 0.15);
+    color: var(--se-green);
+}
+
+.se-tab.done .se-tab-badge {
+    background: rgba(102, 217, 232, 0.15);
+    color: var(--se-cyan);
+}
+
+/* ---------- Tab Panels ---------- */
+.se-tab-panel {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.se-tab-panel.active {
+    display: flex;
+}
+

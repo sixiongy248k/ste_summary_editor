@@ -14,6 +14,8 @@ import { state, persistState } from '../core/state.js';
 import { escHtml, spawnPanel } from '../core/utils.js';
 import { registerPrompt, getPrompt } from '../core/system-prompts.js';
 import { renderTable } from '../table/table.js';
+import { TEMPLATES } from '../core/constants.js';
+import { loadTemplate, fillTemplate } from '../core/template-loader.js';
 
 const PROMPT_KEY = 'timeline-editor';
 
@@ -40,7 +42,7 @@ let _panel = null;
  * Open the timeline editor panel.
  * Uses the first timeline-notes supplementary file found.
  */
-export function openTimelineEditor() {
+export async function openTimelineEditor() {
     const file = _getTimelineFile();
     if (!file) {
         alert('No timeline-notes file assigned. Assign a supplementary file with category "Timeline Notes" first.');
@@ -53,11 +55,20 @@ export function openTimelineEditor() {
 
     const content = file.editedContent || file.content || '';
     const isEmpty = _isEffectivelyEmpty(content);
+    const actionBtn = isEmpty
+        ? `<button class="se-btn se-btn-primary se-te-action" id="se-te-action">&#10024; Generate from Summaries</button>`
+        : `<button class="se-btn se-btn-primary se-te-action" id="se-te-action">&#10024; Refine with AI</button>`;
 
+    const tmpl = await loadTemplate(TEMPLATES.TIMELINE_EDITOR_PANEL);
     _panel = document.createElement('div');
     _panel.id = 'se-timeline-editor';
     _panel.className = 'se-timeline-editor';
-    _panel.innerHTML = _buildHtml(file.name, content, isEmpty);
+    _panel.innerHTML = fillTemplate(tmpl, {
+        fileName:  escHtml(file.name),
+        actionBtn,
+        promptKey: PROMPT_KEY,
+        content:   escHtml(content),
+    });
     overlay.appendChild(_panel);
 
     spawnPanel(_panel, overlay, '.se-te-header', 600, 520);
@@ -96,37 +107,6 @@ function _getTimelineFile() {
     return null;
 }
 
-function _buildHtml(fileName, content, isEmpty) {
-    const actionBtn = isEmpty
-        ? `<button class="se-btn se-btn-primary se-te-action" id="se-te-action">&#10024; Generate from Summaries</button>`
-        : `<button class="se-btn se-btn-primary se-te-action" id="se-te-action">&#10024; Refine with AI</button>`;
-
-    return `
-        <div class="se-te-header">
-            <span class="se-te-title">&#128197; Timeline Editor &mdash; <span class="se-te-filename">${escHtml(fileName)}</span></span>
-            <button class="se-close-circle se-te-close">&times;</button>
-        </div>
-        <div class="se-te-toolbar">
-            ${actionBtn}
-            <button class="se-prompt-edit-btn" data-edit-prompt="${PROMPT_KEY}" title="Edit system prompt">&#9881;</button>
-            <span class="se-te-status" id="se-te-status"></span>
-        </div>
-        <div class="se-te-body">
-            <textarea class="se-te-textarea" id="se-te-content" spellcheck="true" placeholder="Timeline notes will appear here…">${escHtml(content)}</textarea>
-        </div>
-        <div class="se-te-result-wrap" id="se-te-result-wrap" style="display:none;">
-            <div class="se-te-result-label">AI suggestion &mdash; review before accepting</div>
-            <textarea class="se-te-result-textarea" id="se-te-result" rows="8" readonly></textarea>
-            <div class="se-te-result-actions">
-                <button class="se-btn se-btn-primary se-btn-sm" id="se-te-accept">Accept &amp; Save</button>
-                <button class="se-btn se-btn-sm" id="se-te-reject">Discard</button>
-            </div>
-        </div>
-        <div class="se-te-footer">
-            <button class="se-btn se-btn-sm se-te-revert" id="se-te-revert">Revert to Original</button>
-            <button class="se-btn se-btn-primary se-te-save" id="se-te-save">Save Changes</button>
-        </div>`;
-}
 
 function _buildEntriesContext() {
     const sorted = [...state.entries.values()].sort((a, b) => a.num - b.num);

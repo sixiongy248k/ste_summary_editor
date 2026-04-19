@@ -1,0 +1,24 @@
+<div class="se-te-header">
+    <span class="se-te-title">&#128197; Timeline Editor &mdash; <span class="se-te-filename">{{fileName}}</span></span>
+    <button class="se-close-circle se-te-close">&times;</button>
+</div>
+<div class="se-te-toolbar">
+    {{actionBtn}}
+    <button class="se-prompt-edit-btn" data-edit-prompt="{{promptKey}}" title="Edit system prompt">&#9881;</button>
+    <span class="se-te-status" id="se-te-status"></span>
+</div>
+<div class="se-te-body">
+    <textarea class="se-te-textarea" id="se-te-content" spellcheck="true" placeholder="Timeline notes will appear here&hellip;">{{content}}</textarea>
+</div>
+<div class="se-te-result-wrap" id="se-te-result-wrap" style="display:none;">
+    <div class="se-te-result-label">AI suggestion &mdash; review before accepting</div>
+    <textarea class="se-te-result-textarea" id="se-te-result" rows="8" readonly></textarea>
+    <div class="se-te-result-actions">
+        <button class="se-btn se-btn-primary se-btn-sm" id="se-te-accept">Accept &amp; Save</button>
+        <button class="se-btn se-btn-sm" id="se-te-reject">Discard</button>
+    </div>
+</div>
+<div class="se-te-footer">
+    <button class="se-btn se-btn-sm se-te-revert" id="se-te-revert">Revert to Original</button>
+    <button class="se-btn se-btn-primary se-te-save" id="se-te-save">Save Changes</button>
+</div>
