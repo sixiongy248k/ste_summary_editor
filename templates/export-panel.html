@@ -1,118 +1,151 @@
 <!-- ============================================================
      Summary Editor — Export Panel (Tab 4)
-     Full export workflow with live preview, scope, RAG toggles.
+     Step-by-step form flow: Scope → Format & Options → Export
+     All IDs preserved; logic unchanged.
      ============================================================ -->
 
 <h3>Summary Export</h3>
 
-<!-- Destination selector -->
-<div class="se-export-options">
-    <label>
-        Destination:
-        <select id="se-export-dest">
-            <option value="source-folder" id="se-dest-source-folder">Source Folder</option>
-            <option value="download">Download</option>
-            <option value="new-folder">New Folder (custom path)</option>
-        </select>
-    </label>
-    <div class="se-folder-path-wrap" id="se-folder-path-wrap" style="display:none;">
-        <label class="se-folder-path-label">Folder path:
-            <input type="text" id="se-folder-path" class="se-folder-path-input"
-                   placeholder="e.g. exports/my_timeline" />
-        </label>
-        <span class="se-folder-path-hint" id="se-folder-path-hint">Files will be saved to this folder via ST file API</span>
-    </div>
-</div>
+<div class="se-export-steps">
 
-<!-- Scope selector -->
-<div>
-    <span style="color:#75715e; font-size:0.78em; text-transform:uppercase;">Scope:</span>
-    <div class="se-export-scope" style="margin-top:4px;">
-        <button class="se-scope-btn active" data-scope="all" id="se-scope-all">All entries (<span id="se-scope-all-count">0</span>)</button>
-        <span class="se-scope-act-wrap">
-            <button class="se-scope-btn" data-scope="act" id="se-scope-act">Current act</button>
-            <select id="se-scope-act-select" class="se-scope-act-dropdown" title="Select act to export">
-            </select>
-        </span>
-        <button class="se-scope-btn" data-scope="selected" id="se-scope-selected">Selected entries (<span id="se-scope-sel-count">0</span>)</button>
-    </div>
-</div>
-
-<!-- RAG reword checkboxes (experimental) -->
-<div>
-    <label class="se-export-check">
-        <input type="checkbox" id="se-export-rag" />
-        Reword entries for RAG clarity (Experimental)
-        <button class="se-prompt-edit-btn" data-edit-prompt="rag-reword" title="Edit RAG reword prompt">&#9881;</button>
-    </label>
-    <label class="se-export-check warn" id="se-export-rag-confirm-wrap" style="display:none; margin-top:4px; margin-left:24px;">
-        <input type="checkbox" id="se-export-rag-confirm" />
-        I understand this rewrites my content
-    </label>
-    <label class="se-export-check" style="margin-top:6px;">
-        <input type="checkbox" id="se-export-auto-inject" />
-        Auto-inject into databank after every export
-    </label>
-</div>
-
-<!-- Action buttons -->
-<div class="se-export-actions">
-    <span class="se-export-dl-group">
-        <button class="se-btn se-btn-primary se-btn-dl-export" id="se-btn-do-export">
-            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-                <div class="se-btn-info-tip-title">Download Export</div>
-                <div class="se-btn-info-tip-body">.txt — plain text, newlines preserved.<br>.json — full fidelity, all characters encoded.<br>.yaml — multi-line block scalars.</div>
-            </span></span>
-            Download Export
-        </button>
-        <span class="se-format-group" id="se-format-group">
-            <button class="se-format-btn active" data-format="txt">.txt</button>
-            <button class="se-format-btn" data-format="json">.json</button>
-            <button class="se-format-btn" data-format="yaml">.yaml</button>
-        </span>
-    </span>
-    <button class="se-btn" id="se-btn-export-by-source">
-        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-            <div class="se-btn-info-tip-title">Download by Source</div>
-            <div class="se-btn-info-tip-body">One file per source — each file contains only the entries originally ingested from it.</div>
-        </span></span>
-        Download by Source
-    </button>
-    <button class="se-btn" id="se-btn-export-zip">
-        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-            <div class="se-btn-info-tip-title">Download as Zip</div>
-            <div class="se-btn-info-tip-body">Bundles all source files into a single zip archive for easy download.</div>
-        </span></span>
-        Download as Zip
-    </button>
-    <button class="se-btn se-btn-destructive" id="se-btn-destructive-export">
-        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-            <div class="se-btn-info-tip-title">Destructive Export</div>
-            <div class="se-btn-info-tip-body">Downloads each source file with its original filename. Save to the same folder to overwrite originals. Backup ZIP offered first.</div>
-        </span></span>
-        &#9888; Overwrite Source Files
-    </button>
-    <button class="se-btn se-btn-cyan" id="se-btn-databank-inject">
-        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-            <div class="se-btn-info-tip-title">Inject into Databank</div>
-            <div class="se-btn-info-tip-body">Uploads the exported text to SillyTavern's databank for RAG retrieval in chats.</div>
-        </span></span>
-        Inject into Databank
-    </button>
-    <span class="se-copy-wrap">
-        <button class="se-btn" id="se-btn-copy-clipboard">
-            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
-                <div class="se-btn-info-tip-title">Copy to Clipboard</div>
-                <div class="se-btn-info-tip-body">Copies the full export preview text to the clipboard.</div>
-            </span></span>
-            Copy to Clipboard
-        </button>
-        <div class="se-copy-popover" id="se-copy-popover">
-            <div class="se-copy-popover-header">Copied to clipboard</div>
-            <pre class="se-copy-popover-body" id="se-copy-popover-body"></pre>
+    <!-- ── Step 1: Scope ──────────────────────────────────── -->
+    <div class="se-export-step">
+        <div class="se-step-spine">
+            <div class="se-step-badge">1</div>
+            <div class="se-step-line"></div>
         </div>
-    </span>
-</div>
+        <div class="se-step-card">
+            <div class="se-step-title">Scope</div>
+            <div class="se-step-body">
+                <div class="se-export-scope">
+                    <button class="se-scope-btn active" data-scope="all" id="se-scope-all">All entries (<span id="se-scope-all-count">0</span>)</button>
+                    <span class="se-scope-act-wrap">
+                        <button class="se-scope-btn" data-scope="act" id="se-scope-act">Current act</button>
+                        <select id="se-scope-act-select" class="se-scope-act-dropdown" title="Select act to export"></select>
+                    </span>
+                    <button class="se-scope-btn" data-scope="selected" id="se-scope-selected">Selected entries (<span id="se-scope-sel-count">0</span>)</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step 2: Format & Options ───────────────────────── -->
+    <div class="se-export-step">
+        <div class="se-step-spine">
+            <div class="se-step-badge">2</div>
+            <div class="se-step-line"></div>
+        </div>
+        <div class="se-step-card">
+            <div class="se-step-title">Format &amp; Options</div>
+            <div class="se-step-body">
+
+                <!-- Format + Destination on one line -->
+                <div class="se-step-row">
+                    <span class="se-step-label">Format</span>
+                    <span class="se-format-group" id="se-format-group">
+                        <button class="se-format-btn active" data-format="txt">.txt</button>
+                        <button class="se-format-btn" data-format="json">.json</button>
+                        <button class="se-format-btn" data-format="yaml">.yaml</button>
+                    </span>
+                    <span class="se-step-label se-step-label-mid">Destination</span>
+                    <select id="se-export-dest" class="se-step-select">
+                        <option value="source-folder" id="se-dest-source-folder">Source Folder</option>
+                        <option value="download">Download</option>
+                        <option value="new-folder">New Folder (custom path)</option>
+                    </select>
+                </div>
+                <div class="se-folder-path-wrap" id="se-folder-path-wrap" style="display:none;">
+                    <input type="text" id="se-folder-path" class="se-folder-path-input"
+                           placeholder="e.g. exports/my_timeline" />
+                    <span class="se-folder-path-hint" id="se-folder-path-hint">Files will be saved to this folder via ST file API</span>
+                </div>
+
+                <!-- Options -->
+                <div class="se-step-options">
+                    <label class="se-export-check">
+                        <input type="checkbox" id="se-export-rag" />
+                        Reword entries for RAG clarity (Experimental)
+                        <button class="se-prompt-edit-btn" data-edit-prompt="rag-reword" title="Edit RAG reword prompt">&#9881;</button>
+                    </label>
+                    <label class="se-export-check warn" id="se-export-rag-confirm-wrap" style="display:none; margin-left:20px;">
+                        <input type="checkbox" id="se-export-rag-confirm" />
+                        I understand this rewrites my content
+                    </label>
+                    <label class="se-export-check">
+                        <input type="checkbox" id="se-export-auto-inject" />
+                        Auto-inject into databank after every export
+                    </label>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Step 3: Export ─────────────────────────────────── -->
+    <div class="se-export-step se-export-step-last">
+        <div class="se-step-spine">
+            <div class="se-step-badge">3</div>
+        </div>
+        <div class="se-step-card">
+            <div class="se-step-title">Export</div>
+            <div class="se-step-body">
+                <div class="se-export-actions">
+                    <span class="se-export-dl-group">
+                        <button class="se-btn se-btn-primary se-btn-dl-export" id="se-btn-do-export">
+                            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                                <div class="se-btn-info-tip-title">Download Export</div>
+                                <div class="se-btn-info-tip-body">.txt — plain text, newlines preserved.<br>.json — full fidelity, all characters encoded.<br>.yaml — multi-line block scalars.</div>
+                            </span></span>
+                            Download Export
+                        </button>
+                    </span>
+                    <button class="se-btn" id="se-btn-export-by-source">
+                        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                            <div class="se-btn-info-tip-title">Download by Source</div>
+                            <div class="se-btn-info-tip-body">One file per source — each file contains only the entries originally ingested from it.</div>
+                        </span></span>
+                        Download by Source
+                    </button>
+                    <button class="se-btn" id="se-btn-export-zip">
+                        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                            <div class="se-btn-info-tip-title">Download as Zip</div>
+                            <div class="se-btn-info-tip-body">Bundles all source files into a single zip archive for easy download.</div>
+                        </span></span>
+                        Download as Zip
+                    </button>
+                    <button class="se-btn se-btn-destructive" id="se-btn-destructive-export">
+                        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                            <div class="se-btn-info-tip-title">Destructive Export</div>
+                            <div class="se-btn-info-tip-body">Downloads each source file with its original filename. Save to the same folder to overwrite originals. Backup ZIP offered first.</div>
+                        </span></span>
+                        &#9888; Overwrite Source Files
+                    </button>
+                    <button class="se-btn se-btn-cyan" id="se-btn-databank-inject">
+                        <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                            <div class="se-btn-info-tip-title">Inject into Databank</div>
+                            <div class="se-btn-info-tip-body">Uploads the exported text to SillyTavern's databank for RAG retrieval in chats.</div>
+                        </span></span>
+                        Inject into Databank
+                    </button>
+                    <span class="se-copy-wrap">
+                        <button class="se-btn" id="se-btn-copy-clipboard">
+                            <span class="se-btn-info">&#9432;<span class="se-btn-info-tip">
+                                <div class="se-btn-info-tip-title">Copy to Clipboard</div>
+                                <div class="se-btn-info-tip-body">Copies the full export preview text to the clipboard.</div>
+                            </span></span>
+                            Copy to Clipboard
+                        </button>
+                        <div class="se-copy-popover" id="se-copy-popover">
+                            <div class="se-copy-popover-header">Copied to clipboard</div>
+                            <pre class="se-copy-popover-body" id="se-copy-popover-body"></pre>
+                        </div>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /.se-export-steps -->
 
 <!-- Hidden format value (read by JS) -->
 <input type="hidden" id="se-export-format" value="txt" />

@@ -18,6 +18,10 @@
     margin-left: auto;
 }
 
+.se-acts-toolbar-right {
+    margin-left: auto;
+}
+
 .se-acts-content {
     display: flex;
     flex: 1;

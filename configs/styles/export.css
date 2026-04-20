@@ -26,6 +26,112 @@
     padding: 8px 20px;
 }
 
+/* ─── Step flow layout ───────────────────────────────────────────────────── */
+.se-export-steps {
+    padding: 10px 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.se-export-step {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+}
+
+.se-step-spine {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 28px;
+}
+
+.se-step-badge {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--se-bg-mid);
+    border: 2px solid var(--se-green);
+    color: var(--se-green);
+    font-size: 0.78em;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+}
+
+.se-step-line {
+    flex: 1;
+    width: 2px;
+    background: var(--se-border);
+    margin: 3px 0;
+    min-height: 12px;
+}
+
+.se-step-card {
+    flex: 1;
+    padding-bottom: 18px;
+    min-width: 0;
+}
+
+.se-export-step-last .se-step-card {
+    padding-bottom: 4px;
+}
+
+.se-step-title {
+    font-size: 0.72em;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #75715e;
+    margin-bottom: 8px;
+    padding-top: 5px;
+}
+
+.se-step-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.se-step-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.se-step-label {
+    font-size: 0.8em;
+    color: #75715e;
+    min-width: 72px;
+    flex-shrink: 0;
+}
+.se-step-label-mid {
+    min-width: unset;
+    margin-left: 14px;
+}
+
+.se-step-select {
+    background: var(--se-bg-mid);
+    border: 1px solid var(--se-border);
+    border-radius: 4px;
+    color: var(--se-text);
+    font-size: 0.82em;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+.se-step-options {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding-top: 2px;
+}
+
 .se-export-options {
     display: flex;
     gap: 20px;
@@ -119,18 +225,33 @@
     border-color: #777;
 }
 
-/* Act scope wrap — button + dropdown inline */
+/* Act scope wrap — joined button + dropdown */
 .se-scope-act-wrap {
     display: inline-flex;
-    gap: 4px;
+    gap: 0;
     align-items: center;
+}
+
+.se-scope-act-wrap .se-scope-btn {
+    border-radius: 4px 0 0 4px;
+    border-right: none;
+}
+
+.se-scope-act-wrap .se-scope-btn.active {
+    border-right: none;
+}
+
+.se-scope-act-wrap .se-scope-btn.active + .se-scope-act-dropdown {
+    background: rgba(166, 226, 46, 0.08);
+    border-color: var(--se-green);
+    color: var(--se-green);
 }
 
 .se-scope-act-dropdown {
     background: var(--se-border);
     color: var(--se-text);
     border: 1px solid #555;
-    border-radius: 4px;
+    border-radius: 0 4px 4px 0;
     padding: 5px 24px 5px 8px;
     font-size: 0.82em;
     font-family: inherit;
@@ -150,6 +271,7 @@
     box-sizing: border-box;
     padding: 4px 14px;
     font-size: 0.82em;
+    border-radius: 4px;
 }
 
 .se-format-group {
@@ -171,7 +293,7 @@
 }
 
 .se-format-btn:first-child {
-    border-radius: 0;
+    border-radius: 4px 0 0 4px;
     border-left: 1px solid #555;
 }
 
