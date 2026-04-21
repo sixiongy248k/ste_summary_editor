@@ -233,6 +233,27 @@
     color: #fff;
 }
 
+.se-btn-shortcuts {
+    background: transparent;
+    border: 1px solid var(--se-border);
+    border-radius: 50%;
+    color: var(--se-muted);
+    font-size: 0.82em;
+    font-weight: 700;
+    width: 22px;
+    height: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: border-color 0.15s, color 0.15s;
+}
+.se-btn-shortcuts:hover {
+    border-color: var(--se-cyan);
+    color: var(--se-cyan);
+}
+
 /* Undo box — shows what action can be reverted */
 .se-undo-box {
     display: flex;

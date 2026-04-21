@@ -15,6 +15,30 @@
 
 import { getCheckedNums } from '../table/table.js';
 import { createActFromSelection } from '../arcs/arcs.js';
+import { loadTemplate, fillTemplate } from './template-loader.js';
+import { spawnPanel } from './utils.js';
+import { TEMPLATES } from './constants.js';
+
+/** @type {jQuery|null} Cached shortcuts panel. */
+let $ksPanel = null;
+
+/**
+ * Open (or focus) the Keyboard Shortcuts floating panel.
+ */
+export async function openKeyboardShortcutsPanel() {
+    if ($ksPanel?.length && document.body.contains($ksPanel[0])) {
+        return;
+    }
+    const tmpl = await loadTemplate(TEMPLATES.KEYBOARD_SHORTCUTS_PANEL);
+    const html = fillTemplate(tmpl, {});
+    const overlay = document.getElementById('se-modal-overlay');
+    $ksPanel = $(html).appendTo(overlay);
+    spawnPanel($ksPanel[0], overlay, '.se-float-panel-header');
+    $ksPanel.find('.se-ks-close').on('click', () => {
+        $ksPanel.remove();
+        $ksPanel = null;
+    });
+}
 
 /** @type {Function|null} */
 let _openContentEditorFn = null;

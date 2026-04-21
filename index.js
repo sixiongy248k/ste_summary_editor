@@ -30,7 +30,7 @@ import {
 import {
     initActs, updateActButtonState, createActFromSelection,
     renderActPanel, toggleMinimap, buildMinimapOverlay,
-    updateFilterDropdown, updateBulkActDropdown, updateTabBadges,
+    updateFilterDropdown, updateBulkActDropdown, updateBulkActSwatch, updateTabBadges,
     closeAllPopovers, showActColorDialog, showEntrySelector,
     buildTimelineDiagram, setTimelineRenderer,
 } from './src/arcs/arcs.js';
@@ -43,7 +43,7 @@ import {
 import { handleDatabankInject } from './src/export/databank.js';
 import { rewordForRAG } from './src/integration/rag-reword.js';
 import { injectMagicWandOption } from './src/integration/magic-wand.js';
-import { bindKeyboardShortcuts } from './src/core/keyboard.js';
+import { bindKeyboardShortcuts, openKeyboardShortcutsPanel } from './src/core/keyboard.js';
 import { bindTooltipEvents, hideTooltip } from './src/table/tooltip.js';
 import { showMoveDialog, showSwapDialog } from './src/table/reorder.js';
 import { showTagBrowser } from './src/table/tags.js';
@@ -429,6 +429,7 @@ function bindModalEvents() {
  */
 function bindCoreEvents() {
     $('#se-btn-close').on('click', closeEditor);
+    $('#se-btn-shortcuts').on('click', openKeyboardShortcutsPanel);
     $('#se-modal-overlay').on('click', (e) => {
         if (e.target.id === 'se-modal-overlay') closeEditor();
     });
@@ -791,7 +792,7 @@ function bindReviewEvents() {
         if (nums.length === 1) openSplitDialog(nums[0]);
     });
     $('#se-btn-bulk-fill').on('click', openBulkFill);
-    $('#se-bulk-act-assign').on('change', handleBulkActAssign);
+    $('#se-bulk-act-assign').on('change', () => { handleBulkActAssign(); updateBulkActSwatch(); });
 
     // ── Utils panel (draggable floating panel) ──────────────────
     let _utilsPanel = null;

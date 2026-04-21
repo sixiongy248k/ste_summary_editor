@@ -334,6 +334,22 @@
     pointer-events: none;
 }
 
+.se-act-assign-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0;
+}
+
+.se-act-assign-swatch {
+    display: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-right: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
 .se-selection-bar .se-sel-action select {
     background: var(--se-bg-dark);
     color: var(--se-text);

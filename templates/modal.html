@@ -19,7 +19,7 @@
                     <button class="se-btn se-btn-sm" id="se-btn-undo">Revert</button>
                 </div>
                 <button id="se-btn-clear-all-header" title="Clear all data and reset">Clear All</button>
-
+                <button class="se-btn-shortcuts" id="se-btn-shortcuts" title="Keyboard shortcuts">?</button>
                 <button class="se-header-close" id="se-btn-close" title="Close">&times;</button>
             </div>
         </div>
@@ -171,9 +171,12 @@
             <div class="se-selection-bar" id="se-selection-bar">
                 <span class="se-sel-count">0 selected</span>
                 <span class="se-sel-action">
-                    <select id="se-bulk-act-assign">
-                        <option value="">Assign to act…</option>
-                    </select>
+                    <span class="se-act-assign-wrap">
+                        <span class="se-act-assign-swatch" id="se-bulk-act-swatch"></span>
+                        <select id="se-bulk-act-assign">
+                            <option value="">Assign to act…</option>
+                        </select>
+                    </span>
                 </span>
                 <button class="se-btn se-btn-sm" id="se-btn-create-act" disabled>Create Act from Selection</button>
                 <button class="se-btn se-btn-sm" id="se-btn-move-entry" title="Move selected entry before another row">&#8693; Move Before&hellip;</button>

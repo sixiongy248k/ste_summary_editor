@@ -939,9 +939,26 @@ export function updateBulkActDropdown() {
     $select.find('option').not(':first').remove();
 
     for (const act of state.acts.values()) {
-        $select.append(`<option value="${act.id}">${escHtml(act.name)}</option>`);
+        $select.append(
+            $('<option>').val(act.id).text(act.name).attr('data-color', act.color?.bg || '')
+        );
     }
     $select.append('<option value="new" style="color:#a6e22e;">+ New Act...</option>');
+    updateBulkActSwatch();
+}
+
+/**
+ * Sync the color swatch dot next to the bulk act dropdown to the selected act's color.
+ */
+export function updateBulkActSwatch() {
+    const $select = $('#se-bulk-act-assign');
+    const $swatch = $('#se-bulk-act-swatch');
+    const color = $select.find(':selected').attr('data-color') || '';
+    if (color) {
+        $swatch.css({ background: color, display: 'inline-block' });
+    } else {
+        $swatch.css('display', 'none');
+    }
 }
 
 /**
