@@ -69,9 +69,14 @@ function handleKeydown(e, closeEditorFn) {
     // Only handle shortcuts when the modal is visible
     if (!$('#se-modal-overlay').hasClass('active')) return;
 
-    // Escape always works, even in inputs
+    // Escape: close content editor first if open, otherwise close the whole panel
     if (e.key === 'Escape') {
-        closeEditorFn();
+        const $ce = $('#se-content-editor');
+        if ($ce.length) {
+            $ce.remove();
+        } else {
+            closeEditorFn();
+        }
         return;
     }
 
